@@ -1,5 +1,7 @@
 package cs455.scaling.server;
 
+import cs455.scaling.missions.Mission;
+import cs455.scaling.missions.Read;
 import cs455.scaling.threadpool.ThreadPoolManager;
 
 import java.io.IOException;
@@ -18,6 +20,7 @@ public class Server {
     private ThreadPoolManager threadPoolManager = ThreadPoolManager.getInstance();
     private ServerSocketChannel serverSocketChannel;
     private Selector selector;
+    private int bufferSize = 8000; //sending 8kb messages
 
     public void startServer() throws IOException {
         openChannels();
@@ -31,26 +34,11 @@ public class Server {
                 if (key.isAcceptable()) {
                     this.accept(key);
                 } else if (key.isReadable()) {
-
+                    this.read(key);
                 } else if (key.isWritable()) {
-
+                    this.write(key);
                 }
             }
-        }
-    }
-
-    private void read(SelectionKey key) throws IOException {
-        SocketChannel channel = (SocketChannel) key.channel();
-        ByteBuffer byteBuffer = ByteBuffer.allocate(1); //placeholder int value
-
-        int read = 0;
-
-        try {
-            while (byteBuffer.hasRemaining() && read != -1) {
-                read = channel.read(byteBuffer);
-            }
-        } catch (IOException e) {
-            //disconnect code goes here
         }
     }
 
@@ -58,9 +46,27 @@ public class Server {
         ServerSocketChannel serverSocket = (ServerSocketChannel) key.channel();
         SocketChannel channel = serverSocket.accept();
 
+        System.out.println("Accepting incoming connection");
         channel.configureBlocking(false);
         channel.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE);
-        System.out.println("Accepting incoming connection");
+    }
+
+    private void read(SelectionKey key) throws IOException {
+        Read read = new Read(key, bufferSize, this);
+        threadPoolManager.addTask(read);
+    }
+
+    private void write(SelectionKey key) throws IOException {
+        SocketChannel channel = (SocketChannel) key.channel();
+//        ByteBuffer byteBuffer = ByteBuffer.wrap(data); //byte[]
+//        channel.write(byteBuffer);
+        key.interestOps(SelectionKey.OP_READ);
+    }
+
+    public void disconnect(SelectionKey key) throws IOException {
+        key.channel().close();
+        key.cancel();
+        System.out.println("Connection closed");
     }
 
     private void openChannels() throws IOException {

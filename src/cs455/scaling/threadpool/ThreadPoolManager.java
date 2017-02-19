@@ -1,6 +1,6 @@
 package cs455.scaling.threadpool;
 
-import cs455.scaling.server.Mission;
+import cs455.scaling.missions.Mission;
 
 import java.util.LinkedList;
 

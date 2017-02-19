@@ -1,6 +1,6 @@
 package cs455.scaling.test;
 
-import cs455.scaling.server.Mission;
+import cs455.scaling.missions.Mission;
 
 public class TestSleep implements Mission {
 

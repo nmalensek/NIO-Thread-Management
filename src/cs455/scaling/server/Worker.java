@@ -1,5 +1,6 @@
 package cs455.scaling.server;
 
+import cs455.scaling.missions.Mission;
 import cs455.scaling.threadpool.ThreadPoolManager;
 
 public class Worker extends Thread {
