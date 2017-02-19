@@ -1,8 +1,8 @@
 package cs455.scaling.test;
 
 import cs455.scaling.server.Mission;
-import cs455.scaling.server.ThreadPool;
-import cs455.scaling.server.ThreadPoolManager;
+import cs455.scaling.threadpool.ThreadPool;
+import cs455.scaling.threadpool.ThreadPoolManager;
 
 public class ThreadPoolTest {
 

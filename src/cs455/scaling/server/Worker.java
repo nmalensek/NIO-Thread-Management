@@ -1,5 +1,7 @@
 package cs455.scaling.server;
 
+import cs455.scaling.threadpool.ThreadPoolManager;
+
 public class Worker extends Thread {
 
     private ThreadPoolManager threadPoolManager = ThreadPoolManager.getInstance();
