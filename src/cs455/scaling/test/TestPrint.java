@@ -14,5 +14,10 @@ public class TestPrint implements Mission {
     public void perform() {
         System.out.println("mission complete!");
         threadPoolTest.incrementTaskCounter();
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }
