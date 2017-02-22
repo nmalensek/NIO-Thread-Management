@@ -1,8 +1,8 @@
-package cs455.scaling.missions;
+package cs455.scaling.tasks;
 
 import java.io.IOException;
 
-public interface Mission {
+public interface Task {
 
     void perform() throws IOException;
 }

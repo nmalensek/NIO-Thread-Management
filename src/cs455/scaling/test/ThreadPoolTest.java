@@ -1,6 +1,6 @@
 package cs455.scaling.test;
 
-import cs455.scaling.missions.Mission;
+import cs455.scaling.tasks.Task;
 import cs455.scaling.threadpool.ThreadPool;
 import cs455.scaling.threadpool.ThreadPoolManager;
 
@@ -12,16 +12,18 @@ public class ThreadPoolTest {
 
     private void start() {
         testThreadPool.setPoolSize(10);
-        addMissionsToList();
         testThreadPool.createThreads();
-        while (true) {
+        addMissionsToList();
+//        while (true) {
             try {
-                Thread.sleep(5000);
-                addMissionsToList();
+                Thread.sleep(2000);
+                addSingleMission();
+                addSingleMission();
+                addSingleMission();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-        }
+//        }
     }
 
     public synchronized void incrementTaskCounter() {
@@ -29,18 +31,17 @@ public class ThreadPoolTest {
         System.out.println(taskCounter);
     }
 
+    private void addSingleMission() {
+        testTPM.addTask(new TestPrint(this));
+    }
+
     private void addMissionsToList() {
-        for (Mission mission : missions) {
-            testTPM.addTask(mission);
+        for (Task task : tasks) {
+            testTPM.addTask(task);
         }
     }
 
-    Mission[] missions = {
-            new TestPrint(this),
-            new TestPrint(this),
-            new TestPrint(this),
-            new TestPrint(this),
-            new TestPrint(this),
+    Task[] tasks = {
             new TestPrint(this),
             new TestPrint(this),
             new TestPrint(this),

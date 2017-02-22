@@ -1,8 +1,8 @@
 package cs455.scaling.test;
 
-import cs455.scaling.missions.Mission;
+import cs455.scaling.tasks.Task;
 
-public class TestPrint implements Mission {
+public class TestPrint implements Task {
 
     private ThreadPoolTest threadPoolTest;
 
@@ -15,7 +15,7 @@ public class TestPrint implements Mission {
         System.out.println("mission complete!");
         threadPoolTest.incrementTaskCounter();
         try {
-            Thread.sleep(2000);
+            Thread.sleep(5000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

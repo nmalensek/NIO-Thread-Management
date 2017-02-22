@@ -5,6 +5,7 @@ import java.net.InetSocketAddress;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
+import java.util.Iterator;
 import java.util.LinkedList;
 
 public class Client {
@@ -33,8 +34,14 @@ public class Client {
 
     private void startActions() throws IOException {
         while (true) {
-            if (key.isConnectable()) {
-                this.connect(key);
+            clientSelector.select();
+            Iterator keys = this.clientSelector.selectedKeys().iterator();
+            while(keys.hasNext()) {
+                SelectionKey key = (SelectionKey) keys.next();
+                keys.remove();
+                if (key.isConnectable()) {
+                    this.connect(key);
+                }
             }
         }
     }

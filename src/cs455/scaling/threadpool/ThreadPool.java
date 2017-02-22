@@ -9,12 +9,13 @@ public class ThreadPool {
 
     private int poolSize;
     private static final ThreadPool instance = new ThreadPool();
-    private List<Worker> workers = new ArrayList<>();
+    private final List<Worker> workers = new ArrayList<>();
 
     private ThreadPool() {}
 
     public static ThreadPool getInstance() { return instance; }
 
+    public List<Worker> getWorkers() { return workers; }
     public void setPoolSize(int size) { poolSize = size; }
 
     public void createThreads() {

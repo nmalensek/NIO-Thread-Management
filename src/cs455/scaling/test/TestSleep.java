@@ -1,8 +1,8 @@
 package cs455.scaling.test;
 
-import cs455.scaling.missions.Mission;
+import cs455.scaling.tasks.Task;
 
-public class TestSleep implements Mission {
+public class TestSleep implements Task {
 
     private ThreadPoolTest threadPoolTest;
 
