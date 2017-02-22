@@ -13,7 +13,9 @@ public class ThreadPoolManager {
     private static final ThreadPoolManager threadPoolManager = new ThreadPoolManager();
     public static Object objectToSynchronizeOn = new Object();
 
-    public static ThreadPoolManager getInstance() { return threadPoolManager; }
+    public static ThreadPoolManager getInstance() {
+        return threadPoolManager;
+    }
 
     public synchronized void addTask(Task task) {
         synchronized (objectToSynchronizeOn) {
@@ -25,15 +27,15 @@ public class ThreadPoolManager {
                 }
             }
         }
-            TASK_LINKED_LIST.add(task);
-            notifyAll();
+        TASK_LINKED_LIST.add(task);
+        notifyAll();
     }
 
     public synchronized Task removeFirstTask() throws InterruptedException {
-            while (TASK_LINKED_LIST.isEmpty()) {
-                wait();
-            }
-            return TASK_LINKED_LIST.remove();
+        while (TASK_LINKED_LIST.isEmpty()) {
+            wait();
+        }
+        return TASK_LINKED_LIST.remove();
     }
 
     public void addThreadsToPool(int threadsToAdd) {

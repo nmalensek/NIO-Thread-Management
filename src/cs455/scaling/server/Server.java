@@ -1,6 +1,6 @@
 package cs455.scaling.server;
 
-import cs455.scaling.tasks.AcceptConnection;
+import cs455.scaling.Node;
 import cs455.scaling.tasks.Read;
 import cs455.scaling.tasks.Write;
 import cs455.scaling.threadpool.ThreadPoolManager;
@@ -12,18 +12,21 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.time.LocalDateTime;
 import java.util.Iterator;
 
-public class Server {
+public class Server implements Node {
 
     private static int portNum;
     private static int poolSize;
     private ThreadPoolManager threadPoolManager = ThreadPoolManager.getInstance();
     private ServerSocketChannel serverSocketChannel;
     private Selector selector;
-    private int bufferSize = 8192; //sending 8kb messages
+    private int bufferSize = 8000; //sending 8kb messages
     private byte[] bytes = ByteBuffer.allocate(8000).putInt(555555555).array(); //test array
-    AcceptConnection acceptConnection = new AcceptConnection();
+    private int activeConnections;
+    private int sentMessages;
+    private int receivedMessages;
 
     public void startServer() throws IOException {
         openChannels();
@@ -31,70 +34,46 @@ public class Server {
         listenForTasks();
     }
 
+    private void openChannels() throws IOException {
+        serverSocketChannel = ServerSocketChannel.open();
+        serverSocketChannel.configureBlocking(false);
+        serverSocketChannel.socket().bind(new InetSocketAddress(portNum));
+        selector = Selector.open();
+        serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
+    }
+
     private void listenForTasks() throws IOException {
         while (true) {
-            try{
-                this.selector.select();
-                Iterator keys = this.selector.selectedKeys().iterator();
-                while (keys.hasNext()) {
-                    SelectionKey key = (SelectionKey) keys.next();
-                    keys.remove();
-                    if (key.isAcceptable()) {
-                        this.accept(key);
-                    } else if (key.isReadable()) {
-                        this.read(key);
-                    } else if (key.isWritable()) {
-                        this.write(key, bytes);
-                    }
+            this.selector.select();
+            Iterator keys = this.selector.selectedKeys().iterator();
+            while (keys.hasNext()) {
+                SelectionKey key = (SelectionKey) keys.next();
+                keys.remove();
+                if (key.isAcceptable() && key.isValid()) {
+                    this.accept(key);
+                    System.out.println(activeConnections);
+                } else if (key.isReadable() && key.isValid()) {
+                    this.read(key);
+                } else if (key.isWritable() && key.isValid()) {
+                    this.write(key, bytes);
                 }
-            } catch (NullPointerException npe) {
-                System.out.println("null");
-                break;
             }
         }
     }
 
-    private synchronized void accept(SelectionKey key) throws IOException {
-//        acceptConnection.setFields(key, selector);
-//        threadPoolManager.addTask(acceptConnection);
+    private void accept(SelectionKey key) throws IOException {
         ServerSocketChannel serverSocket = (ServerSocketChannel) key.channel();
         SocketChannel channel = serverSocket.accept();
 
         System.out.println("Accepting incoming connection");
         channel.configureBlocking(false);
         channel.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE);
+        incrementConnectionCount();
     }
 
     private void read(SelectionKey key) throws IOException {
         Read read = new Read(key, bufferSize, this);
         threadPoolManager.addTask(read);
-//        SocketChannel channel = (SocketChannel) key.channel();
-//        ByteBuffer byteBuffer = ByteBuffer.allocate(bufferSize);
-//
-//        int read = 0;
-//
-//        try {
-//            while (byteBuffer.hasRemaining() && read != -1) {
-//                read = channel.read(byteBuffer);
-//            }
-//        } catch (IOException e) {
-//            System.out.println("IO Error, connection closed");
-//            channel.close();
-//            server.disconnect(key);
-//            key.channel().close();
-//            key.cancel();
-//            return;
-//        }
-//
-//        if (read == -1) {
-//            //connection terminated by client
-//            server.disconnect(key);
-//            key.channel().close();
-//            key.cancel();
-//            return;
-//        }
-//
-//        key.interestOps(SelectionKey.OP_WRITE);
     }
 
     private void write(SelectionKey key, byte[] data) throws IOException {
@@ -107,18 +86,33 @@ public class Server {
 //        key.interestOps(SelectionKey.OP_READ);
     }
 
-    public void disconnect(SelectionKey key) throws IOException {
-        key.channel().close();
-        key.cancel();
-        System.out.println("Connection closed");
+    public synchronized void incrementMessagesSent() {
+        sentMessages++;
     }
 
-    private void openChannels() throws IOException {
-        serverSocketChannel = ServerSocketChannel.open();
-        serverSocketChannel.configureBlocking(false);
-        serverSocketChannel.socket().bind(new InetSocketAddress(portNum));
-        selector = Selector.open();
-        serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
+    public synchronized void incrementMessagesReceived() {
+        receivedMessages++;
+    }
+    public void incrementConnectionCount() {
+        activeConnections++;
+    }
+    public synchronized void decrementConnectionCount() {
+        activeConnections--;
+    }
+
+    public int calculateThroughput() {
+        int currentSentMessages = sentMessages;
+        int currentReceivedMessages = receivedMessages;
+        int throughput = (currentSentMessages + currentReceivedMessages)/5;
+        return throughput;
+    }
+
+    public void printThroughputMessage(int throughput) {
+        String throughputMessage = "";
+        throughputMessage += LocalDateTime.now().toString() + " ";
+        throughputMessage += "Current Server Throughput: " + throughput + " messages/s ";
+        throughputMessage += "Active Client Connections: " + activeConnections;
+        System.out.println(throughputMessage);
     }
 
     public static void main(String[] args) throws IOException {

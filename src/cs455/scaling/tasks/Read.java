@@ -1,5 +1,6 @@
 package cs455.scaling.tasks;
 
+import cs455.scaling.Node;
 import cs455.scaling.server.Server;
 
 import java.io.IOException;
@@ -11,12 +12,12 @@ public class Read implements Task {
 
     private SelectionKey key;
     private int bufferSize;
-    private Server server;
+    private Node node;
 
-    public Read(SelectionKey key, int bufferSize, Server server) {
+    public Read(SelectionKey key, int bufferSize, Node node) {
         this.key = key;
         this.bufferSize = bufferSize;
-        this.server = server;
+        this.node = node;
     }
 
     public void perform() throws IOException {
@@ -32,7 +33,6 @@ public class Read implements Task {
         } catch (IOException e) {
             System.out.println("IO Error, connection closed");
             channel.close();
-            server.disconnect(key);
             key.channel().close();
             key.cancel();
             return;
@@ -41,9 +41,10 @@ public class Read implements Task {
         if (read == -1) {
             //connection terminated by client
             System.out.println("Client terminated connection");
-            server.disconnect(key);
+            channel.close();
             key.channel().close();
             key.cancel();
+            node.decrementConnectionCount();
             return;
         }
 
