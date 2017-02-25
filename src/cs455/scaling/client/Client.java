@@ -1,8 +1,9 @@
 package cs455.scaling.client;
 
 import cs455.scaling.Node;
+import cs455.scaling.tasks.ClientRead;
 import cs455.scaling.tasks.ComputeHash;
-import cs455.scaling.tasks.Read;
+import cs455.scaling.tasks.ServerRead;
 import cs455.scaling.tasks.Write;
 
 import java.io.IOException;
@@ -36,22 +37,24 @@ public class Client implements Node {
     }
 
     private void startActions() throws IOException {
-        while (true) {
+        int cycles = 0;
+        while (cycles < 10) {
             clientSelector.select();
-            Iterator keys = this.clientSelector.selectedKeys().iterator();
-            while(keys.hasNext()) {
+            Iterator keys = clientSelector.selectedKeys().iterator();
+            while (keys.hasNext()) {
                 SelectionKey key = (SelectionKey) keys.next();
                 keys.remove();
                 if (key.isConnectable()) {
-                    this.connect(key);
+                    connect(key);
                 } else if (key.isReadable()) {
-                    this.read(key);
+                    read(key);
                 } else if (key.isWritable()) {
                     byte[] arrayToSend = prepareMessage();
                     computeAndStoreHash(arrayToSend);
-                    this.write(key, arrayToSend);
+                    write(key, arrayToSend);
                 }
             }
+            cycles++;
         }
     }
 
@@ -63,19 +66,19 @@ public class Client implements Node {
 
     private void read(SelectionKey key) throws IOException {
         System.out.println("client read test");
-        Read read = new Read(key, bufferSize, this);
-        read.perform();
+        ClientRead clientRead = new ClientRead(key, bufferSize, this);
+        clientRead.perform();
     }
 
     private void write(SelectionKey key, byte[] data) throws IOException {
         System.out.println("client write test");
-        Write write = new Write(key, data);
+        Write write = new Write(key, data, this);
         write.perform();
     }
 
     private byte[] prepareMessage() {
         byte[] byteArray = new byte[8000];
-        for (int i = 0; i < byteArray.length-1; i++) {
+        for (int i = 0; i < byteArray.length - 1; i++) {
             byteArray[i] = (byte) ThreadLocalRandom.current().nextInt(127);
         }
         return byteArray;
@@ -83,6 +86,7 @@ public class Client implements Node {
 
     private void computeAndStoreHash(byte[] bytes) {
         String newHash = ComputeHash.SHA1FromBytes(bytes);
+        System.out.println(newHash);
         sentHashList.add(newHash);
     }
 
@@ -93,11 +97,23 @@ public class Client implements Node {
     public void incrementMessagesReceived() {
         messagesReceived++;
     }
+
     public void incrementConnectionCount() {
         //unused
     }
+
     public void decrementConnectionCount() {
         //unused
+    }
+
+    public synchronized void checkForHashInList(String replyHash) {
+        if (sentHashList.contains(replyHash)) {
+            sentHashList.remove(replyHash);
+            System.out.println("great success!");
+        } else {
+            System.out.println(replyHash);
+            System.out.println("Message corrupted");
+        }
     }
 
     public static void main(String[] args) throws IOException {

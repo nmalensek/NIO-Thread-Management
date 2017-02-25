@@ -1,20 +1,21 @@
 package cs455.scaling.tasks;
 
 import cs455.scaling.Node;
-import cs455.scaling.server.Server;
+import cs455.scaling.threadpool.ThreadPoolManager;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 
-public class Read implements Task {
+public class ServerRead implements Task {
 
     private SelectionKey key;
     private int bufferSize;
     private Node node;
+    private ThreadPoolManager threadPoolManager = ThreadPoolManager.getInstance();
 
-    public Read(SelectionKey key, int bufferSize, Node node) {
+    public ServerRead(SelectionKey key, int bufferSize, Node node) {
         this.key = key;
         this.bufferSize = bufferSize;
         this.node = node;
@@ -29,7 +30,13 @@ public class Read implements Task {
         try {
             while (byteBuffer.hasRemaining() && read != -1) {
                 read = channel.read(byteBuffer);
+                byte[] byteCopy = new byte[read];
+                System.arraycopy(byteBuffer.array(), 0, byteCopy, 0, read);
+                node.incrementMessagesReceived();
+                Write reply = new Write(key, byteCopy, node);
+                threadPoolManager.addTask(reply);
             }
+
         } catch (IOException e) {
             System.out.println("IO Error, connection closed");
             channel.close();
@@ -48,6 +55,6 @@ public class Read implements Task {
             return;
         }
 
-        key.interestOps(SelectionKey.OP_WRITE);
+//        key.interestOps(SelectionKey.OP_WRITE);
     }
 }
