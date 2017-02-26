@@ -12,6 +12,7 @@ public class ThreadPoolTest {
     private void start() {
         testThreadPool.setPoolSize(10);
         testThreadPool.createThreads();
+        testTPM.start();
         addTasksToList();
     }
 

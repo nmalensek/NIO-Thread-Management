@@ -11,7 +11,6 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.time.LocalDateTime;
 import java.util.*;
 
 public class Server {
@@ -37,6 +36,7 @@ public class Server {
         openChannels();
         threadPoolManager.addThreadsToPool(poolSize);
         serverMessageTracker.start();
+        threadPoolManager.start();
         listenForTasks();
     }
 
