@@ -77,8 +77,10 @@ public class ThreadPoolManager extends Thread {
 //                }
 //            }
 //        }
-        TASK_LINKED_LIST.add(task);
-        notifyAll();
+        synchronized (taskAvailableObject) {
+            TASK_LINKED_LIST.add(task);
+            taskAvailableObject.notifyAll();
+        }
     }
 
     public synchronized Task removeFirstTask() throws InterruptedException {
