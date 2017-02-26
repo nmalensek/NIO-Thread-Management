@@ -1,6 +1,6 @@
 package cs455.scaling.tasks;
 
-import cs455.scaling.Node;
+import cs455.scaling.server.Server;
 import cs455.scaling.threadpool.ThreadPoolManager;
 
 import java.io.IOException;
@@ -12,13 +12,13 @@ public class ServerRead implements Task {
 
     private SelectionKey key;
     private int bufferSize;
-    private Node node;
+    private Server server;
     private ThreadPoolManager threadPoolManager = ThreadPoolManager.getInstance();
 
-    public ServerRead(SelectionKey key, int bufferSize, Node node) {
+    public ServerRead(SelectionKey key, int bufferSize, Server server) {
         this.key = key;
         this.bufferSize = bufferSize;
-        this.node = node;
+        this.server = server;
     }
 
     public void perform() throws IOException {
@@ -32,8 +32,8 @@ public class ServerRead implements Task {
                 read = channel.read(byteBuffer);
                 byte[] byteCopy = new byte[read];
                 System.arraycopy(byteBuffer.array(), 0, byteCopy, 0, read);
-                node.incrementMessagesReceived();
-                Write reply = new Write(key, byteCopy, node);
+                server.incrementMessagesReceived();
+                ServerWrite reply = new ServerWrite(key, byteCopy, server);
                 threadPoolManager.addTask(reply);
             }
 
@@ -51,7 +51,7 @@ public class ServerRead implements Task {
             channel.close();
             key.channel().close();
             key.cancel();
-            node.decrementConnectionCount();
+            server.decrementConnectionCount();
             return;
         }
 

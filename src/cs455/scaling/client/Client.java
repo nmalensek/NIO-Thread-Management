@@ -1,21 +1,18 @@
 package cs455.scaling.client;
 
-import cs455.scaling.Node;
 import cs455.scaling.tasks.ClientRead;
+import cs455.scaling.tasks.ClientWrite;
 import cs455.scaling.tasks.ComputeHash;
-import cs455.scaling.tasks.ServerRead;
-import cs455.scaling.tasks.Write;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
-import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class Client implements Node {
+public class Client {
 
     private static String serverHost;
     private static int serverPort;
@@ -27,6 +24,8 @@ public class Client implements Node {
     private LinkedList<String> sentHashList = new LinkedList<>();
     private int messagesSent;
     private int messagesReceived;
+    private List<Character> clientCharList = new ArrayList<>();
+    private Map<SelectionKey, List<Character>> clientPendingActions = new HashMap<>();
 
     private void startClient() throws IOException {
         clientChannel = SocketChannel.open();
@@ -43,18 +42,29 @@ public class Client implements Node {
             Iterator keys = clientSelector.selectedKeys().iterator();
             while (keys.hasNext()) {
                 SelectionKey key = (SelectionKey) keys.next();
+                clientPendingActions.put(key, clientCharList);
                 keys.remove();
                 if (key.isConnectable()) {
                     connect(key);
                 } else if (key.isReadable()) {
-                    read(key);
+                    if (clientPendingActions.get(key).contains('R')) {
+
+                    } else {
+                        clientPendingActions.get(key).add('R');
+                        read(key);
+                    }
                 } else if (key.isWritable()) {
-                    byte[] arrayToSend = prepareMessage();
-                    computeAndStoreHash(arrayToSend);
-                    write(key, arrayToSend);
+                    if (clientPendingActions.get(key).contains('W')) {
+                        //do nothing, action is already registered
+                    } else {
+                        clientPendingActions.get(key).add('W');
+                        byte[] arrayToSend = prepareMessage();
+                        computeAndStoreHash(arrayToSend);
+                        write(key, arrayToSend);
+                        cycles++;
+                    }
                 }
             }
-            cycles++;
         }
     }
 
@@ -71,9 +81,9 @@ public class Client implements Node {
     }
 
     private void write(SelectionKey key, byte[] data) throws IOException {
-        System.out.println("client write test");
-        Write write = new Write(key, data, this);
-        write.perform();
+        System.out.println("client serverWrite test");
+        ClientWrite clientWrite = new ClientWrite(key, data, this);
+        clientWrite.perform();
     }
 
     private byte[] prepareMessage() {
@@ -98,15 +108,7 @@ public class Client implements Node {
         messagesReceived++;
     }
 
-    public void incrementConnectionCount() {
-        //unused
-    }
-
-    public void decrementConnectionCount() {
-        //unused
-    }
-
-    public synchronized void checkForHashInList(String replyHash) {
+    public void checkForHashInList(String replyHash) {
         if (sentHashList.contains(replyHash)) {
             sentHashList.remove(replyHash);
             System.out.println("great success!");
@@ -115,6 +117,8 @@ public class Client implements Node {
             System.out.println("Message corrupted");
         }
     }
+
+    public Map<SelectionKey, List<Character>> getPendingActions() { return clientPendingActions; }
 
     public static void main(String[] args) throws IOException {
         Client client = new Client();

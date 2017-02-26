@@ -1,6 +1,5 @@
 package cs455.scaling.tasks;
 
-import cs455.scaling.Node;
 import cs455.scaling.client.Client;
 
 import java.io.IOException;
@@ -28,6 +27,17 @@ public class ClientRead implements Task {
         try {
             while (byteBuffer.hasRemaining() && read != -1) {
                 read = channel.read(byteBuffer);
+                if (read > 0) {
+                    byte[] byteCopy = new byte[read];
+                    System.arraycopy(byteBuffer.array(), 0, byteCopy, 0, read);
+                    String packetContents = new String(byteCopy);
+                    client.checkForHashInList(packetContents);
+                    client.getPendingActions().get(key).remove(Character.valueOf('R'));
+                    client.incrementMessagesReceived();
+                    key.interestOps(SelectionKey.OP_WRITE);
+                } else {
+                    byteBuffer.position(byteBuffer.limit());
+                }
             }
 
         } catch (IOException e) {
@@ -44,14 +54,9 @@ public class ClientRead implements Task {
             channel.close();
             key.channel().close();
             key.cancel();
-            client.decrementConnectionCount();
             return;
         }
 
-        byte[] byteCopy = new byte[read];
-        System.arraycopy(byteBuffer.array(), 0, byteCopy, 0, read);
-        String packetContents = new String(byteCopy);
-        client.checkForHashInList(packetContents);
         key.interestOps(SelectionKey.OP_WRITE);
     }
 }
