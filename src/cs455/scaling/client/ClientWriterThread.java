@@ -32,6 +32,8 @@ public class ClientWriterThread extends Thread {
                 e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();
+                System.out.println("Server disconnected, exiting...");
+                break;
             }
         }
     }

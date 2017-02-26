@@ -45,8 +45,7 @@ public class Client {
     }
 
     private void startActions() throws IOException {
-        int cycles = 0;
-        while (cycles < 10) {
+        while (true) {
             clientSelector.select();
             Iterator keys = clientSelector.selectedKeys().iterator();
             while (keys.hasNext()) {
@@ -63,7 +62,6 @@ public class Client {
                         read(key);
                     }
                 }
-                cycles++;
             }
         }
     }
@@ -72,7 +70,7 @@ public class Client {
     private void connect(SelectionKey key) throws IOException {
         SocketChannel channel = (SocketChannel) key.channel();
         channel.finishConnect();
-        key.interestOps(SelectionKey.OP_WRITE);
+        key.interestOps(SelectionKey.OP_READ);
     }
 
     private void read(SelectionKey key) throws IOException {
