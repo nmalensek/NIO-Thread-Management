@@ -7,7 +7,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom; //TODO check if this is allowed (part of concurrent package)
+import java.util.Random;
 
 public class ClientWriterThread extends Thread {
 
@@ -49,9 +49,7 @@ public class ClientWriterThread extends Thread {
 
     private byte[] prepareMessage() {
         byte[] byteArray = new byte[8000];
-        for (int i = 0; i < byteArray.length - 1; i++) {
-            byteArray[i] = (byte) ThreadLocalRandom.current().nextInt(127);
-        }
+        new Random().nextBytes(byteArray);
         return byteArray;
     }
 
