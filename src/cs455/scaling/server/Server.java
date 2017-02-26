@@ -36,6 +36,7 @@ public class Server {
     public void startServer() throws IOException {
         openChannels();
         threadPoolManager.addThreadsToPool(poolSize);
+        serverMessageTracker.start();
         listenForTasks();
     }
 
@@ -163,10 +164,12 @@ public class Server {
 
     public Map<SelectionKey, List<Character>> getPendingActions() { return pendingKeyActions; }
 
-    public void copyTrackers() {
+    public synchronized void copyAndResetTrackers() {
         serverMessageTracker.setCurrentSentMessages(sentMessages);
         serverMessageTracker.setCurrentReceivedMessages(receivedMessages);
         serverMessageTracker.setCurrentActiveConnections(activeConnections);
+        sentMessages = 0;
+        receivedMessages = 0;
     }
 
     private byte[] prepareReply(byte[] messageFromClient) {

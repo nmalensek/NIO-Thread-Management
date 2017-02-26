@@ -11,9 +11,6 @@ public class ServerMessageTracker extends Thread {
     private int currentReceivedMessages;
     private int currentActiveConnections;
 
-    private int previousSentMessages;
-    private int previousReceivedMessages;
-
     public ServerMessageTracker(Server server) {
         this.server = server;
     }
@@ -30,20 +27,8 @@ public class ServerMessageTracker extends Thread {
     }
 
     public void reportServerThroughput() {
-        server.copyTrackers();
-        removeOldCounts();
-        archiveCounts();
+        server.copyAndResetTrackers();
         printThroughputMessage(calculateThroughput());
-    }
-
-    private void removeOldCounts() {
-        currentSentMessages = currentSentMessages - previousSentMessages;
-        currentReceivedMessages = currentReceivedMessages - previousReceivedMessages;
-    }
-
-    private void archiveCounts() {
-        previousSentMessages = currentSentMessages;
-        previousReceivedMessages = currentReceivedMessages;
     }
 
     public int calculateThroughput() {

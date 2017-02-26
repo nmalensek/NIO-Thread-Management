@@ -35,6 +35,7 @@ public class Client {
         clientChannel.configureBlocking(false);
         clientChannel.connect(new InetSocketAddress(serverHost, serverPort));
         key = clientChannel.register(clientSelector, SelectionKey.OP_CONNECT);
+        clientMessageTracker.start();
     }
 
     private void startActions() throws IOException {
@@ -102,17 +103,19 @@ public class Client {
         sentHashList.add(newHash);
     }
 
-    public void incrementMessagesSent() {
+    public synchronized void incrementMessagesSent() {
         messagesSent++;
     }
 
-    public void incrementMessagesReceived() {
+    public synchronized void incrementMessagesReceived() {
         messagesReceived++;
     }
 
-    public void copyTrackers() {
+    public synchronized void copyAndResetTrackers() {
         clientMessageTracker.setCurrentSentMessages(messagesSent);
         clientMessageTracker.setCurrentReceivedMessages(messagesReceived);
+        messagesSent = 0;
+        messagesReceived = 0;
     }
 
     public void checkForHashInList(String replyHash) {

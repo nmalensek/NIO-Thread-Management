@@ -10,9 +10,6 @@ public class ClientMessageTracker extends Thread {
     private int currentSentMessages;
     private int currentReceivedMessages;
 
-    private int previousSentMessages;
-    private int previousReceivedMessages;
-
     public ClientMessageTracker(Client client) {
         this.client = client;
     }
@@ -29,20 +26,8 @@ public class ClientMessageTracker extends Thread {
     }
 
     public void reportClientThroughput() {
-        client.copyTrackers();
-        removeOldCounts();
-        archiveCounts();
+        client.copyAndResetTrackers();
         printMessagingRate(currentSentMessages, currentReceivedMessages);
-    }
-
-    private void removeOldCounts() {
-        currentSentMessages = currentSentMessages - previousSentMessages;
-        currentReceivedMessages = currentReceivedMessages - previousReceivedMessages;
-    }
-
-    private void archiveCounts() {
-        previousSentMessages = currentSentMessages;
-        previousReceivedMessages = currentReceivedMessages;
     }
 
     public void printMessagingRate(int sent, int received) {
