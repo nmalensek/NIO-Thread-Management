@@ -23,8 +23,8 @@ public class ClientWrite implements Task {
         ByteBuffer byteBuffer = ByteBuffer.wrap(data);
         channel.write(byteBuffer);
         client.incrementMessagesSent();
-        client.getPendingActions().get(key).remove(Character.valueOf('W'));
-        key.interestOps(SelectionKey.OP_READ);
+//        client.getPendingActions().get(key).remove(Character.valueOf('W'));
+//        key.interestOps(SelectionKey.OP_READ);
     }
 }
 

@@ -2,7 +2,6 @@ package cs455.scaling.client;
 
 import cs455.scaling.tasks.ClientRead;
 import cs455.scaling.tasks.ClientWrite;
-import cs455.scaling.tasks.ComputeHash;
 import cs455.scaling.tracking.ClientMessageTracker;
 
 import java.io.IOException;
@@ -11,7 +10,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.*;
-import java.util.concurrent.ThreadLocalRandom; //TODO check if this is allowed (part of concurrent package)
+
 
 public class Client {
 
@@ -22,7 +21,8 @@ public class Client {
     private Selector clientSelector;
     private SelectionKey key;
     private int bufferSize = 8000;
-    private LinkedList<String> sentHashList = new LinkedList<>();
+    private List<String> sentHashList =
+            Collections.synchronizedList(new LinkedList<>());
     private int messagesSent;
     private int messagesReceived;
     private ClientMessageTracker clientMessageTracker = new ClientMessageTracker(this);
@@ -40,7 +40,7 @@ public class Client {
     }
 
     private void startWriterThread() {
-        ClientWriterThread clientWriterThread = new ClientWriterThread(this, messageRate);
+        ClientWriterThread clientWriterThread = new ClientWriterThread(this, key, messageRate, sentHashList);
         clientWriterThread.start();
     }
 
@@ -62,20 +62,12 @@ public class Client {
                         clientPendingActions.get(key).add('R');
                         read(key);
                     }
-                } else if (key.isWritable()) {
-                    if (clientPendingActions.get(key).contains('W')) {
-                        //do nothing, action is already registered
-                    } else {
-                        clientPendingActions.get(key).add('W');
-                        byte[] arrayToSend = prepareMessage();
-                        computeAndStoreHash(arrayToSend);
-                        write(key, arrayToSend);
-                        cycles++;
-                    }
                 }
+                cycles++;
             }
         }
     }
+
 
     private void connect(SelectionKey key) throws IOException {
         SocketChannel channel = (SocketChannel) key.channel();
@@ -91,20 +83,6 @@ public class Client {
     private void write(SelectionKey key, byte[] data) throws IOException {
         ClientWrite clientWrite = new ClientWrite(key, data, this);
         clientWrite.perform();
-    }
-
-    private byte[] prepareMessage() {
-        byte[] byteArray = new byte[8000];
-        for (int i = 0; i < byteArray.length - 1; i++) {
-            byteArray[i] = (byte) ThreadLocalRandom.current().nextInt(127);
-        }
-        return byteArray;
-    }
-
-    private void computeAndStoreHash(byte[] bytes) {
-        String newHash = ComputeHash.SHA1FromBytes(bytes);
-        System.out.println(newHash);
-        sentHashList.add(newHash);
     }
 
     public synchronized void incrementMessagesSent() {
@@ -132,7 +110,9 @@ public class Client {
         }
     }
 
-    public Map<SelectionKey, List<Character>> getPendingActions() { return clientPendingActions; }
+    public Map<SelectionKey, List<Character>> getPendingActions() {
+        return clientPendingActions;
+    }
 
     public static void main(String[] args) throws IOException {
         Client client = new Client();

@@ -34,7 +34,7 @@ public class ClientRead implements Task {
                     client.checkForHashInList(packetContents);
                     client.getPendingActions().get(key).remove(Character.valueOf('R'));
                     client.incrementMessagesReceived();
-                    key.interestOps(SelectionKey.OP_WRITE);
+//                    key.interestOps(SelectionKey.OP_WRITE);
                 } else {
                     byteBuffer.position(byteBuffer.limit());
                 }
@@ -57,6 +57,6 @@ public class ClientRead implements Task {
             return;
         }
 
-        key.interestOps(SelectionKey.OP_WRITE);
+//        key.interestOps(SelectionKey.OP_WRITE);
     }
 }
