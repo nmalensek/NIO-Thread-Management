@@ -2,6 +2,7 @@ package cs455.scaling.server;
 
 import cs455.scaling.tasks.ComputeHash;
 import cs455.scaling.threadpool.ThreadPoolManager;
+import cs455.scaling.tracking.ServerMessageTracker;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -24,6 +25,7 @@ public class Server {
     private int activeConnections;
     private int sentMessages;
     private int receivedMessages;
+    private ServerMessageTracker serverMessageTracker = new ServerMessageTracker(this);
     private List<Character> charList =
             Collections.synchronizedList(new ArrayList<>());
     private Map<SelectionKey, byte[]> pendingMessages =
@@ -161,24 +163,15 @@ public class Server {
 
     public Map<SelectionKey, List<Character>> getPendingActions() { return pendingKeyActions; }
 
+    public void copyTrackers() {
+        serverMessageTracker.setCurrentSentMessages(sentMessages);
+        serverMessageTracker.setCurrentReceivedMessages(receivedMessages);
+        serverMessageTracker.setCurrentActiveConnections(activeConnections);
+    }
+
     private byte[] prepareReply(byte[] messageFromClient) {
         System.out.println(ComputeHash.SHA1FromBytes(messageFromClient));
         return ComputeHash.SHA1FromBytes(messageFromClient).getBytes();
-    }
-
-    public int calculateThroughput() {
-        int currentSentMessages = sentMessages;
-        int currentReceivedMessages = receivedMessages;
-        int throughput = (currentSentMessages + currentReceivedMessages) / 5;
-        return throughput;
-    }
-
-    public void printThroughputMessage(int throughput) {
-        String throughputMessage = "";
-        throughputMessage += LocalDateTime.now().toString() + " ";
-        throughputMessage += "Current Server Throughput: " + throughput + " messages/s ";
-        throughputMessage += "Active Client Connections: " + activeConnections;
-        System.out.println(throughputMessage);
     }
 
     public static void main(String[] args) throws IOException {

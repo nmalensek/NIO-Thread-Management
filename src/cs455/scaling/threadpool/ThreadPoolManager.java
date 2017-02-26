@@ -6,6 +6,7 @@ import cs455.scaling.tasks.Task;
 import java.util.LinkedList;
 import java.util.List;
 
+
 public class ThreadPoolManager {
     private static final LinkedList<Task> TASK_LINKED_LIST = new LinkedList<>();
     private ThreadPool threadPool = ThreadPool.getInstance();

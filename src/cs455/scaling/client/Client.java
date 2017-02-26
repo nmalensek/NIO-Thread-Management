@@ -3,6 +3,7 @@ package cs455.scaling.client;
 import cs455.scaling.tasks.ClientRead;
 import cs455.scaling.tasks.ClientWrite;
 import cs455.scaling.tasks.ComputeHash;
+import cs455.scaling.tracking.ClientMessageTracker;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -24,6 +25,7 @@ public class Client {
     private LinkedList<String> sentHashList = new LinkedList<>();
     private int messagesSent;
     private int messagesReceived;
+    private ClientMessageTracker clientMessageTracker = new ClientMessageTracker(this);
     private List<Character> clientCharList = new ArrayList<>();
     private Map<SelectionKey, List<Character>> clientPendingActions = new HashMap<>();
 
@@ -106,6 +108,11 @@ public class Client {
 
     public void incrementMessagesReceived() {
         messagesReceived++;
+    }
+
+    public void copyTrackers() {
+        clientMessageTracker.setCurrentSentMessages(messagesSent);
+        clientMessageTracker.setCurrentReceivedMessages(messagesReceived);
     }
 
     public void checkForHashInList(String replyHash) {
