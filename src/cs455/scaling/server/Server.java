@@ -83,13 +83,15 @@ public class Server {
 
         System.out.println("Accepting incoming connection");
         channel.configureBlocking(false);
-        channel.register(selector, SelectionKey.OP_READ);
+        KeyBuffers keyBuffers = new KeyBuffers(bufferSize);
+        channel.register(selector, SelectionKey.OP_READ, keyBuffers);
         incrementConnectionCount();
     }
 
     private synchronized void read(SelectionKey key) throws IOException {
         SocketChannel channel = (SocketChannel) key.channel();
-        ByteBuffer byteBuffer = ByteBuffer.allocate(bufferSize);
+        KeyBuffers keyBuffers = (KeyBuffers) key.attachment();
+        ByteBuffer byteBuffer = keyBuffers.getReadBuffer();
 
         int read = 0;
 
@@ -133,9 +135,11 @@ public class Server {
     private void write(SelectionKey key, byte[] data) throws IOException {
         try {
             SocketChannel channel = (SocketChannel) key.channel();
-            ByteBuffer byteBuffer = ByteBuffer.wrap(data);
+            KeyBuffers keyBuffers = (KeyBuffers) key.attachment();
+            ByteBuffer byteBuffer = keyBuffers.getWriteBuffer().wrap(data);
             channel.write(byteBuffer);
             incrementMessagesSent();
+            byteBuffer.clear();
             key.interestOps(SelectionKey.OP_READ);
             pendingKeyActions.get(key).remove(Character.valueOf('W'));
         } catch (NullPointerException npe) {

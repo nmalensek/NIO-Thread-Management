@@ -25,7 +25,6 @@ public class Client {
     private LinkedList<String> sentHashList = new LinkedList<>();
     private int messagesSent;
     private int messagesReceived;
-    private ClientWriterThread clientWriterThread = new ClientWriterThread(this, messageRate);
     private ClientMessageTracker clientMessageTracker = new ClientMessageTracker(this);
     private List<Character> clientCharList = new ArrayList<>();
     private Map<SelectionKey, List<Character>> clientPendingActions = new HashMap<>();
@@ -37,6 +36,11 @@ public class Client {
         clientChannel.connect(new InetSocketAddress(serverHost, serverPort));
         key = clientChannel.register(clientSelector, SelectionKey.OP_CONNECT);
         clientMessageTracker.start();
+        startWriterThread();
+    }
+
+    private void startWriterThread() {
+        ClientWriterThread clientWriterThread = new ClientWriterThread(this, messageRate);
         clientWriterThread.start();
     }
 

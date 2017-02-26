@@ -62,32 +62,12 @@ public class ThreadPoolManager extends Thread {
     public synchronized void addWorker(Worker worker) {
         availableWorkers.add(worker);
     }
-//
-//    public synchronized void removeWorker(Worker worker) {
-//        availableWorkers.remove(worker);
-//    }
 
     public synchronized void addTask(Task task) {
-//        synchronized (workerAvailableObject) {
-//            while (availableWorkers.isEmpty()) {
-//                try {
-//                    workerAvailableObject.wait();
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        }
         synchronized (taskAvailableObject) {
             TASK_LINKED_LIST.add(task);
             taskAvailableObject.notifyAll();
         }
-    }
-
-    public synchronized Task removeFirstTask() throws InterruptedException {
-        while (TASK_LINKED_LIST.isEmpty()) {
-            wait();
-        }
-        return TASK_LINKED_LIST.remove();
     }
 
     public void addThreadsToPool(int threadsToAdd) {
