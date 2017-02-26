@@ -7,7 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 
-public class ThreadPoolManager {
+public class ThreadPoolManager extends Thread {
     private static final LinkedList<Task> TASK_LINKED_LIST = new LinkedList<>();
     private ThreadPool threadPool = ThreadPool.getInstance();
     private List<Worker> availableWorkers = threadPool.getWorkers();
@@ -16,6 +16,12 @@ public class ThreadPoolManager {
 
     public static ThreadPoolManager getInstance() {
         return threadPoolManager;
+    }
+
+    public void run() {
+        while (true) {
+            
+        }
     }
 
     public synchronized void addTask(Task task) {

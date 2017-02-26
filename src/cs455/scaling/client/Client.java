@@ -25,6 +25,7 @@ public class Client {
     private LinkedList<String> sentHashList = new LinkedList<>();
     private int messagesSent;
     private int messagesReceived;
+    private ClientWriterThread clientWriterThread = new ClientWriterThread(this, messageRate);
     private ClientMessageTracker clientMessageTracker = new ClientMessageTracker(this);
     private List<Character> clientCharList = new ArrayList<>();
     private Map<SelectionKey, List<Character>> clientPendingActions = new HashMap<>();
@@ -36,6 +37,7 @@ public class Client {
         clientChannel.connect(new InetSocketAddress(serverHost, serverPort));
         key = clientChannel.register(clientSelector, SelectionKey.OP_CONNECT);
         clientMessageTracker.start();
+        clientWriterThread.start();
     }
 
     private void startActions() throws IOException {
@@ -78,13 +80,11 @@ public class Client {
     }
 
     private void read(SelectionKey key) throws IOException {
-        System.out.println("client read test");
         ClientRead clientRead = new ClientRead(key, bufferSize, this);
         clientRead.perform();
     }
 
     private void write(SelectionKey key, byte[] data) throws IOException {
-        System.out.println("client serverWrite test");
         ClientWrite clientWrite = new ClientWrite(key, data, this);
         clientWrite.perform();
     }
