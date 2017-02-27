@@ -27,8 +27,8 @@ public class ClientWriterThread extends Thread {
     public void run() {
         while (true) {
             try {
-                Thread.sleep(1000/messageRate);
                 writeMessage();
+                Thread.sleep(1000/messageRate);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             } catch (IOException e) {

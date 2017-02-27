@@ -29,7 +29,7 @@ public class ServerRead implements Task {
         this.keyActions = keyActions;
     }
 
-    public void perform() throws IOException {
+    public synchronized void perform() throws IOException {
         SocketChannel channel = (SocketChannel) key.channel();
         KeyBuffers keyBuffers = (KeyBuffers) key.attachment();
         ByteBuffer byteBuffer = keyBuffers.getReadBuffer();
