@@ -38,7 +38,6 @@ public class Worker extends Thread {
             }
         }
         task.perform();
-        task = null;
         hasTask = false;
     }
 }

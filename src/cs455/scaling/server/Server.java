@@ -60,19 +60,9 @@ public class Server {
                 if (key.isAcceptable()) {
                     accept(key);
                 } else if (key.isReadable()) {
-                    if (pendingKeyActions.get(key).contains('R')) {
-                        //do nothing, action is already registered
-                    } else {
-                        pendingKeyActions.get(key).add('R');
-                        read(key);
-                    }
+                    checkRead(key);
                 } else if (key.isWritable()) {
-                    if (pendingKeyActions.get(key).contains('W')) {
-                        //do nothing, action is already registered
-                    } else {
-                        pendingKeyActions.get(key).add('W');
-                        write(key, pendingMessages.get(key));
-                    }
+                    checkWrite(key);
                 }
             }
         }
@@ -90,6 +80,73 @@ public class Server {
     }
 
     private synchronized void read(SelectionKey key) throws IOException {
+        System.out.println("Reading...");
+        ServerRead serverRead = new ServerRead(key, bufferSize, this, pendingMessages, pendingKeyActions);
+        threadPoolManager.addTask(serverRead);
+    }
+
+    private void write(SelectionKey key, byte[] data) throws IOException {
+        ServerWrite write = new ServerWrite(key, data, this);
+        threadPoolManager.addTask(write);
+    }
+
+    public synchronized void checkRead(SelectionKey key) throws IOException {
+        if (pendingKeyActions.get(key).contains('R')) {
+            //do nothing, action is already registered
+        } else {
+            pendingKeyActions.get(key).add('R');
+            read(key);
+        }
+    }
+
+    public synchronized void checkWrite(SelectionKey key) throws IOException {
+        if (pendingKeyActions.get(key).contains('W')) {
+            //do nothing, action is already registered
+        } else {
+            pendingKeyActions.get(key).add('W');
+            write(key, pendingMessages.remove(key));
+        }
+    }
+
+    public synchronized void incrementMessagesSent() {
+        sentMessages++;
+    }
+
+    public synchronized void incrementMessagesReceived() {
+        receivedMessages++;
+    }
+
+    private void incrementConnectionCount() {
+        activeConnections++;
+    }
+
+    public synchronized void decrementConnectionCount() {
+        activeConnections--;
+    }
+
+    public Map<SelectionKey, List<Character>> getPendingActions() {
+        return pendingKeyActions;
+    }
+
+    public synchronized void copyAndResetTrackers() {
+        serverMessageTracker.setCurrentSentMessages(sentMessages);
+        serverMessageTracker.setCurrentReceivedMessages(receivedMessages);
+        serverMessageTracker.setCurrentActiveConnections(activeConnections);
+        sentMessages = 0;
+        receivedMessages = 0;
+    }
+
+    public static void main(String[] args) throws IOException {
+        Server server = new Server();
+        portNum = Integer.parseInt(args[0]);
+        poolSize = Integer.parseInt(args[1]);
+        server.startServer();
+    }
+}
+
+/**
+ * non-thread pool read method
+ */
 //        SocketChannel channel = (SocketChannel) key.channel();
 //        KeyBuffers keyBuffers = (KeyBuffers) key.attachment();
 //        ByteBuffer byteBuffer = keyBuffers.getReadBuffer();
@@ -133,12 +190,10 @@ public class Server {
 ////        byteBuffer.clear();
 //
 //        key.interestOps(SelectionKey.OP_WRITE);
-        System.out.println("Reading...");
-        ServerRead serverRead = new ServerRead(key, bufferSize, this, pendingMessages, pendingKeyActions);
-        threadPoolManager.addTask(serverRead);
-    }
 
-    private void write(SelectionKey key, byte[] data) throws IOException {
+/**
+ * non-thread pool write method
+ */
 //        try {
 //            SocketChannel channel = (SocketChannel) key.channel();
 //            KeyBuffers keyBuffers = (KeyBuffers) key.attachment();
@@ -151,41 +206,3 @@ public class Server {
 //        } catch (NullPointerException npe) {
 //            System.out.println("There was no data to write");
 //        }
-        System.out.println("Writing...");
-        ServerWrite write = new ServerWrite(key, data, this);
-        threadPoolManager.addTask(write);
-    }
-
-    public synchronized void incrementMessagesSent() {
-        sentMessages++;
-    }
-
-    public synchronized void incrementMessagesReceived() {
-        receivedMessages++;
-    }
-
-    private void incrementConnectionCount() {
-        activeConnections++;
-    }
-
-    public synchronized void decrementConnectionCount() {
-        activeConnections--;
-    }
-
-    public Map<SelectionKey, List<Character>> getPendingActions() { return pendingKeyActions; }
-
-    public synchronized void copyAndResetTrackers() {
-        serverMessageTracker.setCurrentSentMessages(sentMessages);
-        serverMessageTracker.setCurrentReceivedMessages(receivedMessages);
-        serverMessageTracker.setCurrentActiveConnections(activeConnections);
-        sentMessages = 0;
-        receivedMessages = 0;
-    }
-
-    public static void main(String[] args) throws IOException {
-        Server server = new Server();
-        portNum = Integer.parseInt(args[0]);
-        poolSize = Integer.parseInt(args[1]);
-        server.startServer();
-    }
-}

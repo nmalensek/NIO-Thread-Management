@@ -25,13 +25,16 @@ public class ServerWrite implements Task {
         try {
             KeyBuffers keyBuffers = (KeyBuffers) key.attachment();
             ByteBuffer byteBuffer = keyBuffers.getWriteBuffer().wrap(data);
+            byteBuffer.rewind();
             channel.write(byteBuffer);
+            System.out.println("Writing...");
             server.incrementMessagesSent();
-            byteBuffer.clear();
-            server.getPendingActions().get(key).remove(Character.valueOf('W'));
             key.interestOps(SelectionKey.OP_READ);
+            server.getPendingActions().get(key).remove(Character.valueOf('W'));
         } catch (NullPointerException npe) {
-            System.out.println("There was no data to write");
+            System.out.println("Nothing to write");
+            key.interestOps(SelectionKey.OP_READ);
+            server.getPendingActions().get(key).remove(Character.valueOf('W'));
         } catch (IOException e) {
             System.out.println("IO Error, connection closed");
             channel.close();

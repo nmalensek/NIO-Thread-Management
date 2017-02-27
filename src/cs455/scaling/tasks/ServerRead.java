@@ -34,7 +34,7 @@ public class ServerRead implements Task {
         KeyBuffers keyBuffers = (KeyBuffers) key.attachment();
         ByteBuffer byteBuffer = keyBuffers.getReadBuffer();
         int read = 0;
-
+        byteBuffer.clear();
         try {
             while (byteBuffer.hasRemaining() && read != -1) {
                 read = channel.read(byteBuffer);
@@ -63,14 +63,13 @@ public class ServerRead implements Task {
         byte[] replyBytes = prepareReply(byteCopy);
         //                threadPoolManager.addTask(reply);
         server.incrementMessagesReceived();
-        byteBuffer.clear();
         readyMessages.put(key, replyBytes);
         keyActions.get(key).remove(Character.valueOf('R'));
         key.interestOps(SelectionKey.OP_WRITE); //server won't write without this line?
     }
 
     public byte[] prepareReply(byte[] messageFromClient) {
-        System.out.println(ComputeHash.SHA1FromBytes(messageFromClient));
+//        System.out.println(ComputeHash.SHA1FromBytes(messageFromClient));
         return ComputeHash.SHA1FromBytes(messageFromClient).getBytes();
     }
 }
