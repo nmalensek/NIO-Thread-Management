@@ -29,7 +29,7 @@ public class ServerWrite implements Task {
             server.incrementMessagesSent();
             byteBuffer.clear();
             server.getPendingActions().get(key).remove(Character.valueOf('W'));
-        key.interestOps(SelectionKey.OP_READ);
+            key.interestOps(SelectionKey.OP_READ);
         } catch (NullPointerException npe) {
             System.out.println("There was no data to write");
         } catch (IOException e) {

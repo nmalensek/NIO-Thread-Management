@@ -1,7 +1,6 @@
-package cs455.scaling.server;
+package cs455.scaling.threadpool;
 
 import cs455.scaling.tasks.Task;
-import cs455.scaling.threadpool.ThreadPoolManager;
 
 import java.io.IOException;
 

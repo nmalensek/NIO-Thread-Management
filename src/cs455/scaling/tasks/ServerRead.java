@@ -66,7 +66,7 @@ public class ServerRead implements Task {
         byteBuffer.clear();
         readyMessages.put(key, replyBytes);
         keyActions.get(key).remove(Character.valueOf('R'));
-        key.interestOps(SelectionKey.OP_WRITE);
+        key.interestOps(SelectionKey.OP_WRITE); //server won't write without this line?
     }
 
     public byte[] prepareReply(byte[] messageFromClient) {

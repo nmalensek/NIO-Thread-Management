@@ -1,7 +1,5 @@
 package cs455.scaling.threadpool;
 
-import cs455.scaling.server.Worker;
-
 import java.util.LinkedList;
 
 public class ThreadPool {
