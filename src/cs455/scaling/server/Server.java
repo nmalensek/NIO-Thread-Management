@@ -1,6 +1,8 @@
 package cs455.scaling.server;
 
 import cs455.scaling.tasks.ComputeHash;
+import cs455.scaling.tasks.ServerRead;
+import cs455.scaling.tasks.ServerWrite;
 import cs455.scaling.threadpool.ThreadPoolManager;
 import cs455.scaling.tracking.ServerMessageTracker;
 
@@ -12,6 +14,7 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.*;
+
 
 public class Server {
 
@@ -89,65 +92,70 @@ public class Server {
     }
 
     private synchronized void read(SelectionKey key) throws IOException {
-        SocketChannel channel = (SocketChannel) key.channel();
-        KeyBuffers keyBuffers = (KeyBuffers) key.attachment();
-        ByteBuffer byteBuffer = keyBuffers.getReadBuffer();
-
-        int read = 0;
-
-        try {
-            while (byteBuffer.hasRemaining() && read != -1) {
-                read = channel.read(byteBuffer);
-//                threadPoolManager.addTask(reply);
-            }
-
-        } catch (IOException e) {
-            System.out.println("IO Error, connection closed");
-            channel.close();
-            key.channel().close();
-            key.cancel();
-            return;
-        }
-
-        if (read == -1) {
-            //connection terminated by client
-            System.out.println("Client terminated connection");
-            channel.close();
-            key.channel().close();
-            key.cancel();
-            decrementConnectionCount();
-            return;
-        }
-
-        byte[] byteCopy = new byte[read];
-        System.arraycopy(byteBuffer.array(), 0, byteCopy, 0, read);
-        byte[] replyBytes = prepareReply(byteCopy);
-        incrementMessagesReceived();
-        byteBuffer.clear();
-        pendingMessages.put(key, replyBytes);
-        pendingKeyActions.get(key).remove(Character.valueOf('R'));
-
-        key.interestOps(SelectionKey.OP_WRITE);
-//        ServerRead serverRead = new ServerRead(key, bufferSize, this);
-//        threadPoolManager.addTask(serverRead);
+//        SocketChannel channel = (SocketChannel) key.channel();
+//        KeyBuffers keyBuffers = (KeyBuffers) key.attachment();
+//        ByteBuffer byteBuffer = keyBuffers.getReadBuffer();
+//
+//        int read = 0;
+//
+//        try {
+//            while (byteBuffer.hasRemaining() && read != -1) {
+//                read = channel.read(byteBuffer);
+////                threadPoolManager.addTask(reply);
+//            }
+//
+//        } catch (IOException e) {
+//            System.out.println("IO Error, connection closed");
+//            channel.close();
+//            key.channel().close();
+//            key.cancel();
+//            return;
+//        }
+//
+//        if (read == -1) {
+//            //connection terminated by client
+//            System.out.println("Client terminated connection");
+//            channel.close();
+//            key.channel().close();
+//            key.cancel();
+//            decrementConnectionCount();
+//            return;
+//        }
+////TODO reimplement commented out code (makes hashing its own task) once thread pool's implemented
+//        byte[] byteCopy = new byte[read];
+//        System.arraycopy(byteBuffer.array(), 0, byteCopy, 0, read);
+//        byte[] replyBytes = prepareReply(byteCopy);
+//        incrementMessagesReceived();
+//        byteBuffer.clear();
+//        pendingMessages.put(key, replyBytes);
+//        pendingKeyActions.get(key).remove(Character.valueOf('R'));
+////        HashMessage hashMessage = new HashMessage(byteCopy, pendingMessages, pendingKeyActions, key);
+////        threadPoolManager.addTask(hashMessage);
+////        incrementMessagesReceived();
+////        byteBuffer.clear();
+//
+//        key.interestOps(SelectionKey.OP_WRITE);
+        System.out.println("Reading...");
+        ServerRead serverRead = new ServerRead(key, bufferSize, this, pendingMessages, pendingKeyActions);
+        threadPoolManager.addTask(serverRead);
     }
 
     private void write(SelectionKey key, byte[] data) throws IOException {
-        try {
-            SocketChannel channel = (SocketChannel) key.channel();
-            KeyBuffers keyBuffers = (KeyBuffers) key.attachment();
-            ByteBuffer byteBuffer = keyBuffers.getWriteBuffer().wrap(data);
-            channel.write(byteBuffer);
-            incrementMessagesSent();
-            byteBuffer.clear();
-            key.interestOps(SelectionKey.OP_READ);
-            pendingKeyActions.get(key).remove(Character.valueOf('W'));
-        } catch (NullPointerException npe) {
-            System.out.println("There was no data to write");
-        }
-//        System.out.println("server write test");
-//        ServerWrite write = new ServerWrite(key, data, this);
-//        threadPoolManager.addTask(write);
+//        try {
+//            SocketChannel channel = (SocketChannel) key.channel();
+//            KeyBuffers keyBuffers = (KeyBuffers) key.attachment();
+//            ByteBuffer byteBuffer = keyBuffers.getWriteBuffer().wrap(data);
+//            channel.write(byteBuffer);
+//            incrementMessagesSent();
+//            byteBuffer.clear();
+//            key.interestOps(SelectionKey.OP_READ);
+//            pendingKeyActions.get(key).remove(Character.valueOf('W'));
+//        } catch (NullPointerException npe) {
+//            System.out.println("There was no data to write");
+//        }
+        System.out.println("Writing...");
+        ServerWrite write = new ServerWrite(key, data, this);
+        threadPoolManager.addTask(write);
     }
 
     public synchronized void incrementMessagesSent() {
@@ -174,11 +182,6 @@ public class Server {
         serverMessageTracker.setCurrentActiveConnections(activeConnections);
         sentMessages = 0;
         receivedMessages = 0;
-    }
-
-    private byte[] prepareReply(byte[] messageFromClient) {
-        System.out.println(ComputeHash.SHA1FromBytes(messageFromClient));
-        return ComputeHash.SHA1FromBytes(messageFromClient).getBytes();
     }
 
     public static void main(String[] args) throws IOException {

@@ -35,8 +35,8 @@ public class Client {
         clientChannel.configureBlocking(false);
         clientChannel.connect(new InetSocketAddress(serverHost, serverPort));
         key = clientChannel.register(clientSelector, SelectionKey.OP_CONNECT);
-        clientMessageTracker.start();
         startWriterThread();
+        clientMessageTracker.start();
     }
 
     private void startWriterThread() {
@@ -101,10 +101,15 @@ public class Client {
     public void checkForHashInList(String replyHash) {
         if (sentHashList.contains(replyHash)) {
             sentHashList.remove(replyHash);
-            System.out.println("great success!");
+            System.out.println("------------------");
+            System.out.println(replyHash);
+            System.out.println("Success!");
+            System.out.println("------------------");
         } else {
+            System.out.println("------------------");
             System.out.println(replyHash);
             System.out.println("Message corrupted");
+            System.out.println("------------------");
         }
     }
 

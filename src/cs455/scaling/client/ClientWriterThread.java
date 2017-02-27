@@ -4,6 +4,7 @@ import cs455.scaling.tasks.ComputeHash;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.util.List;
@@ -55,7 +56,6 @@ public class ClientWriterThread extends Thread {
 
     private void computeAndStoreHash(byte[] bytes) {
         String newHash = ComputeHash.SHA1FromBytes(bytes);
-        System.out.println(newHash);
         hashList.add(newHash);
     }
 }

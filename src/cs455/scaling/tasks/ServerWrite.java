@@ -1,5 +1,6 @@
 package cs455.scaling.tasks;
 
+import cs455.scaling.server.KeyBuffers;
 import cs455.scaling.server.Server;
 
 import java.io.IOException;
@@ -21,10 +22,22 @@ public class ServerWrite implements Task {
 
     public synchronized void perform() throws IOException {
         SocketChannel channel = (SocketChannel) key.channel();
-        ByteBuffer byteBuffer = ByteBuffer.wrap(data);
-        channel.write(byteBuffer);
-        server.incrementMessagesSent();
-        server.getPendingActions().get(key).remove(Character.valueOf('W'));
+        try {
+            KeyBuffers keyBuffers = (KeyBuffers) key.attachment();
+            ByteBuffer byteBuffer = keyBuffers.getWriteBuffer().wrap(data);
+            channel.write(byteBuffer);
+            server.incrementMessagesSent();
+            byteBuffer.clear();
+            server.getPendingActions().get(key).remove(Character.valueOf('W'));
         key.interestOps(SelectionKey.OP_READ);
+        } catch (NullPointerException npe) {
+            System.out.println("There was no data to write");
+        } catch (IOException e) {
+            System.out.println("IO Error, connection closed");
+            channel.close();
+            key.channel().close();
+            key.cancel();
+            return;
+        }
     }
 }
