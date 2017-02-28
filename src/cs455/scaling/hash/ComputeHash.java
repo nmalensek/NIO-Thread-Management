@@ -1,4 +1,4 @@
-package cs455.scaling.tasks;
+package cs455.scaling.hash;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;

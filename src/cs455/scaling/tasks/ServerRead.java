@@ -1,5 +1,6 @@
 package cs455.scaling.tasks;
 
+import cs455.scaling.hash.ComputeHash;
 import cs455.scaling.server.KeyBuffers;
 import cs455.scaling.server.Server;
 import cs455.scaling.threadpool.ThreadPoolManager;
@@ -57,13 +58,12 @@ public class ServerRead implements Task {
             server.decrementConnectionCount();
             return;
         }
-//TODO make hashing its own task once thread pool's implemented
+
         byte[] byteCopy = new byte[read];
         System.arraycopy(byteBuffer.array(), 0, byteCopy, 0, read);
-        byte[] replyBytes = prepareReply(byteCopy);
-        //                threadPoolManager.addTask(reply);
+        HashMessage hashMessage = new HashMessage(byteCopy, readyMessages, key);
+        threadPoolManager.addTask(hashMessage);
         server.incrementMessagesReceived();
-        readyMessages.put(key, replyBytes);
         keyActions.get(key).remove(Character.valueOf('R'));
         key.interestOps(SelectionKey.OP_WRITE); //server won't write without this line?
     }

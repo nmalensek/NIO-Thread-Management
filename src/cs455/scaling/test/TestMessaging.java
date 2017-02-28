@@ -1,6 +1,6 @@
 package cs455.scaling.test;
 
-import cs455.scaling.tasks.ComputeHash;
+import cs455.scaling.hash.ComputeHash;
 
 import java.util.concurrent.ThreadLocalRandom;
 
