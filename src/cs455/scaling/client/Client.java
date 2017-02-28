@@ -78,11 +78,6 @@ public class Client {
         clientRead.perform();
     }
 
-    private void write(SelectionKey key, byte[] data) throws IOException {
-        ClientWrite clientWrite = new ClientWrite(key, data, this);
-        clientWrite.perform();
-    }
-
     public synchronized void incrementMessagesSent() {
         messagesSent++;
     }
