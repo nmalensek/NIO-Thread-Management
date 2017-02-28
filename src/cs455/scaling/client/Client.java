@@ -77,15 +77,12 @@ public class Client {
         clientRead.perform();
     }
 
-    public synchronized void incrementMessagesSent() {
-        messagesSent++;
-    }
-
+    public synchronized void incrementMessagesSent() { messagesSent++; }
     public synchronized void incrementMessagesReceived() {
         messagesReceived++;
     }
 
-    public synchronized void copyAndResetTrackers() {
+    public void copyAndResetTrackers() {
         clientMessageTracker.setCurrentSentMessages(messagesSent);
         clientMessageTracker.setCurrentReceivedMessages(messagesReceived);
         messagesSent = 0;

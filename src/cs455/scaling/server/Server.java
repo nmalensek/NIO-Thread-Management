@@ -128,7 +128,7 @@ public class Server {
         return pendingKeyActions;
     }
 
-    public synchronized void copyAndResetTrackers() {
+    public void copyAndResetTrackers() {
         serverMessageTracker.setCurrentSentMessages(sentMessages);
         serverMessageTracker.setCurrentReceivedMessages(receivedMessages);
         serverMessageTracker.setCurrentActiveConnections(activeConnections);
