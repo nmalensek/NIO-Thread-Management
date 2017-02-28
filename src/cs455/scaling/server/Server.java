@@ -81,7 +81,7 @@ public class Server {
 
     private synchronized void read(SelectionKey key) throws IOException {
         System.out.println("Reading...");
-        ServerRead serverRead = new ServerRead(key, bufferSize, this, pendingMessages, pendingKeyActions);
+        ServerRead serverRead = new ServerRead(key, this, pendingMessages, pendingKeyActions);
         threadPoolManager.addTask(serverRead);
     }
 

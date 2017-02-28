@@ -1,6 +1,5 @@
 package cs455.scaling.tasks;
 
-import cs455.scaling.hash.ComputeHash;
 import cs455.scaling.server.KeyBuffers;
 import cs455.scaling.server.Server;
 import cs455.scaling.threadpool.ThreadPoolManager;
@@ -15,16 +14,14 @@ import java.util.Map;
 public class ServerRead implements Task {
 
     private SelectionKey key;
-    private int bufferSize;
     private Server server;
     private ThreadPoolManager threadPoolManager = ThreadPoolManager.getInstance();
     private Map<SelectionKey, byte[]> readyMessages;
     private Map<SelectionKey, List<Character>> keyActions;
 
-    public ServerRead(SelectionKey key, int bufferSize, Server server,
+    public ServerRead(SelectionKey key, Server server,
                       Map<SelectionKey, byte[]> readyMessages, Map<SelectionKey, List<Character>> keyActions) {
         this.key = key;
-        this.bufferSize = bufferSize;
         this.server = server;
         this.readyMessages = readyMessages;
         this.keyActions = keyActions;
@@ -66,10 +63,5 @@ public class ServerRead implements Task {
         server.incrementMessagesReceived();
         keyActions.get(key).remove(Character.valueOf('R'));
         key.interestOps(SelectionKey.OP_WRITE); //server won't write without this line?
-    }
-
-    public byte[] prepareReply(byte[] messageFromClient) {
-//        System.out.println(ComputeHash.SHA1FromBytes(messageFromClient));
-        return ComputeHash.SHA1FromBytes(messageFromClient).getBytes();
     }
 }
