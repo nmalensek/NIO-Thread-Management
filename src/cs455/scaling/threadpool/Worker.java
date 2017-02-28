@@ -13,13 +13,7 @@ public class Worker extends Thread {
     public void run() {
         while (true) {
             try {
-                performTask();
-                threadPoolManager.addWorker(this);
-                synchronized (threadPoolManager.workerAvailableObject) {
-                    threadPoolManager.workerAvailableObject.notify();
-                }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+                threadPoolManager.removeTask().perform();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -29,15 +23,5 @@ public class Worker extends Thread {
     public void setTask(Task task) {
         this.task = task;
         hasTask = true;
-    }
-
-    public void performTask() throws IOException, InterruptedException {
-        while (!hasTask) {
-            synchronized (threadPoolManager.taskAvailableObject) {
-                threadPoolManager.taskAvailableObject.wait();
-            }
-        }
-        task.perform();
-        hasTask = false;
     }
 }

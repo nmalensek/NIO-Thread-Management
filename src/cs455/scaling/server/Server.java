@@ -90,7 +90,7 @@ public class Server {
         threadPoolManager.addTask(write);
     }
 
-    public synchronized void checkRead(SelectionKey key) throws IOException {
+    private synchronized void checkRead(SelectionKey key) throws IOException {
         if (pendingKeyActions.get(key).contains('R')) {
             //do nothing, action is already registered
         } else {
@@ -99,7 +99,7 @@ public class Server {
         }
     }
 
-    public synchronized void checkWrite(SelectionKey key) throws IOException {
+    private synchronized void checkWrite(SelectionKey key) throws IOException {
         if (pendingKeyActions.get(key).contains('W')) {
             //do nothing, action is already registered
         } else {
