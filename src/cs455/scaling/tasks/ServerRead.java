@@ -40,27 +40,25 @@ public class ServerRead implements Task {
         } catch (IOException e) {
             System.out.println("IO Error, connection closed");
             channel.close();
-            key.channel().close();
-            key.cancel();
             return;
         }
 
         if (read == -1) {
             //connection terminated by client
-            System.out.println("Client terminated connection");
             channel.close();
-            key.channel().close();
-            key.cancel();
+            //threads notified to keep going
+            ThreadPoolManager.getInstance().addTask(new PrintDisconnect());
+            keyActions.get(key).remove(Character.valueOf('R'));
             server.decrementConnectionCount();
             return;
+        } else {
+            byte[] byteCopy = new byte[read];
+            System.arraycopy(byteBuffer.array(), 0, byteCopy, 0, read);
+            HashMessage hashMessage = new HashMessage(byteCopy, readyMessages, key, server);
+            ThreadPoolManager.getInstance().addTask(hashMessage);
+            server.incrementMessagesReceived();
+            keyActions.get(key).remove(Character.valueOf('R'));
+//        key.interestOps(SelectionKey.OP_WRITE);
         }
-
-        byte[] byteCopy = new byte[read];
-        System.arraycopy(byteBuffer.array(), 0, byteCopy, 0, read);
-        HashMessage hashMessage = new HashMessage(byteCopy, readyMessages, key, server);
-        ThreadPoolManager.getInstance().addTask(hashMessage);
-        server.incrementMessagesReceived();
-        keyActions.get(key).remove(Character.valueOf('R'));
-//        key.interestOps(SelectionKey.OP_WRITE); //server won't write without this line?
     }
 }

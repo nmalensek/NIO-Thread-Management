@@ -38,6 +38,7 @@ public class Server {
         threadPoolManager.addThreadsToPool(poolSize);
         serverMessageTracker.start();
         threadPoolManager.start();
+        System.out.println("Listening on port " + portNum + "...");
         listenForTasks();
     }
 

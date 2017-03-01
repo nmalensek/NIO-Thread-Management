@@ -7,8 +7,8 @@ import java.util.LinkedList;
 
 
 public class ThreadPoolManager extends Thread {
-    private static final LinkedList<Task> TASK_LINKED_LIST = new LinkedList<>();
     private ThreadPool threadPool = ThreadPool.getInstance();
+    private static final LinkedList<Task> TASK_LINKED_LIST = new LinkedList<>();
     private static final ThreadPoolManager threadPoolManager = new ThreadPoolManager();
 
     public static ThreadPoolManager getInstance() {

@@ -7,8 +7,6 @@ import java.io.IOException;
 public class Worker extends Thread {
 
     private ThreadPoolManager threadPoolManager = ThreadPoolManager.getInstance();
-    private boolean hasTask = false;
-    private Task task;
 
     public void run() {
         while (true) {
@@ -18,10 +16,5 @@ public class Worker extends Thread {
                 e.printStackTrace();
             }
         }
-    }
-
-    public void setTask(Task task) {
-        this.task = task;
-        hasTask = true;
     }
 }
