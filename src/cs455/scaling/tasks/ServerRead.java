@@ -15,7 +15,6 @@ public class ServerRead implements Task {
 
     private SelectionKey key;
     private Server server;
-    private ThreadPoolManager threadPoolManager = ThreadPoolManager.getInstance();
     private Map<SelectionKey, byte[]> readyMessages;
     private Map<SelectionKey, List<Character>> keyActions;
 
@@ -58,10 +57,10 @@ public class ServerRead implements Task {
 
         byte[] byteCopy = new byte[read];
         System.arraycopy(byteBuffer.array(), 0, byteCopy, 0, read);
-        HashMessage hashMessage = new HashMessage(byteCopy, readyMessages, key);
-        threadPoolManager.addTask(hashMessage);
+        HashMessage hashMessage = new HashMessage(byteCopy, readyMessages, key, server);
+        ThreadPoolManager.getInstance().addTask(hashMessage);
         server.incrementMessagesReceived();
         keyActions.get(key).remove(Character.valueOf('R'));
-        key.interestOps(SelectionKey.OP_WRITE); //server won't write without this line?
+//        key.interestOps(SelectionKey.OP_WRITE); //server won't write without this line?
     }
 }

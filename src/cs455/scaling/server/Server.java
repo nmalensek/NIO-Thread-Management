@@ -104,6 +104,7 @@ public class Server {
             //do nothing, action is already registered
         } else {
             pendingKeyActions.get(key).add('W');
+            System.out.println(pendingMessages.get(key));
             write(key, pendingMessages.remove(key));
         }
     }
@@ -143,66 +144,3 @@ public class Server {
         server.startServer();
     }
 }
-
-/**
- * non-thread pool read method
- */
-//        SocketChannel channel = (SocketChannel) key.channel();
-//        KeyBuffers keyBuffers = (KeyBuffers) key.attachment();
-//        ByteBuffer byteBuffer = keyBuffers.getReadBuffer();
-//
-//        int read = 0;
-//
-//        try {
-//            while (byteBuffer.hasRemaining() && read != -1) {
-//                read = channel.read(byteBuffer);
-////                threadPoolManager.addTask(reply);
-//            }
-//
-//        } catch (IOException e) {
-//            System.out.println("IO Error, connection closed");
-//            channel.close();
-//            key.channel().close();
-//            key.cancel();
-//            return;
-//        }
-//
-//        if (read == -1) {
-//            //connection terminated by client
-//            System.out.println("Client terminated connection");
-//            channel.close();
-//            key.channel().close();
-//            key.cancel();
-//            decrementConnectionCount();
-//            return;
-//        }
-////TODO reimplement commented out code (makes hashing its own task) once thread pool's implemented
-//        byte[] byteCopy = new byte[read];
-//        System.arraycopy(byteBuffer.array(), 0, byteCopy, 0, read);
-//        byte[] replyBytes = prepareReply(byteCopy);
-//        incrementMessagesReceived();
-//        byteBuffer.clear();
-//        pendingMessages.put(key, replyBytes);
-//        pendingKeyActions.get(key).remove(Character.valueOf('R'));
-////        HashMessage hashMessage = new HashMessage(byteCopy, pendingMessages, pendingKeyActions, key);
-////        threadPoolManager.addTask(hashMessage);
-////        incrementMessagesReceived();
-////        byteBuffer.clear();
-//
-//        key.interestOps(SelectionKey.OP_WRITE);
-
-/**
- * non-thread pool write method
- */
-//        try {
-//            SocketChannel channel = (SocketChannel) key.channel();
-//            KeyBuffers keyBuffers = (KeyBuffers) key.attachment();
-//            ByteBuffer byteBuffer = keyBuffers.getWriteBuffer().wrap(data);
-//            channel.write(byteBuffer);
-//            incrementMessagesSent();
-//            byteBuffer.clear();
-//            key.interestOps(SelectionKey.OP_READ);
-//            pendingKeyActions.get(key).remove(Character.valueOf('W'));
-//        } catch (NullPointerException npe) {
-//            System.out.println("There was no data to write");
-//        }

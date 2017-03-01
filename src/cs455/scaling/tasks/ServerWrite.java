@@ -2,6 +2,7 @@ package cs455.scaling.tasks;
 
 import cs455.scaling.server.KeyBuffers;
 import cs455.scaling.server.Server;
+import cs455.scaling.threadpool.ThreadPoolManager;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -26,11 +27,16 @@ public class ServerWrite implements Task {
             KeyBuffers keyBuffers = (KeyBuffers) key.attachment();
             ByteBuffer byteBuffer = keyBuffers.getWriteBuffer().wrap(data);
             byteBuffer.rewind();
-            channel.write(byteBuffer);
-            System.out.println("Writing...");
-            server.incrementMessagesSent();
-            key.interestOps(SelectionKey.OP_READ);
-            server.getPendingActions().get(key).remove(Character.valueOf('W'));
+            if (channel.write(byteBuffer) < data.length) {
+                key.interestOps(SelectionKey.OP_WRITE);
+                ServerWrite writeCopy = new ServerWrite(key, data, server);
+                ThreadPoolManager.getInstance().addTask(writeCopy); //buffer full, write messages and copy write to TPM
+            } else {
+                System.out.println("Writing...");
+                server.incrementMessagesSent();
+                key.interestOps(SelectionKey.OP_READ);
+                server.getPendingActions().get(key).remove(Character.valueOf('W'));
+            }
         } catch (NullPointerException npe) {
             System.out.println("Nothing to write");
             key.interestOps(SelectionKey.OP_READ);
