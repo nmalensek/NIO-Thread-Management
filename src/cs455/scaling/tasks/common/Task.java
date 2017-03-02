@@ -1,4 +1,4 @@
-package cs455.scaling.tasks;
+package cs455.scaling.tasks.common;
 
 import java.io.IOException;
 

@@ -1,7 +1,9 @@
-package cs455.scaling.tasks;
+package cs455.scaling.tasks.server;
 
 import cs455.scaling.server.KeyBuffers;
 import cs455.scaling.server.Server;
+import cs455.scaling.tasks.common.HashMessage;
+import cs455.scaling.tasks.common.Task;
 import cs455.scaling.threadpool.ThreadPoolManager;
 
 import java.io.IOException;

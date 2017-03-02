@@ -1,6 +1,6 @@
 package cs455.scaling.client;
 
-import cs455.scaling.tasks.ClientRead;
+import cs455.scaling.tasks.client.ClientRead;
 import cs455.scaling.tracking.ClientMessageTracker;
 
 import java.io.IOException;
@@ -92,15 +92,9 @@ public class Client {
     public void checkForHashInList(String replyHash) {
         if (sentHashList.contains(replyHash)) {
             sentHashList.remove(replyHash);
-            System.out.println("------------------");
-            System.out.println(replyHash);
-            System.out.println("Success!");
-            System.out.println("------------------");
+            incrementMessagesReceived();
         } else {
-            System.out.println("------------------");
-            System.out.println(replyHash);
-            System.out.println("Message corrupted");
-            System.out.println("------------------");
+
         }
     }
 

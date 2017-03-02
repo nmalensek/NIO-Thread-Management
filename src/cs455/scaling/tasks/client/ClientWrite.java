@@ -1,6 +1,7 @@
-package cs455.scaling.tasks;
+package cs455.scaling.tasks.client;
 
 import cs455.scaling.client.Client;
+import cs455.scaling.tasks.common.Task;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;

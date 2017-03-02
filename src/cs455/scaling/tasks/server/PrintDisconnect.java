@@ -1,4 +1,6 @@
-package cs455.scaling.tasks;
+package cs455.scaling.tasks.server;
+
+import cs455.scaling.tasks.common.Task;
 
 import java.io.IOException;
 

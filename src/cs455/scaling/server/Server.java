@@ -1,7 +1,7 @@
 package cs455.scaling.server;
 
-import cs455.scaling.tasks.ServerRead;
-import cs455.scaling.tasks.ServerWrite;
+import cs455.scaling.tasks.server.ServerRead;
+import cs455.scaling.tasks.server.ServerWrite;
 import cs455.scaling.threadpool.ThreadPoolManager;
 import cs455.scaling.tracking.ServerMessageTracker;
 
@@ -105,7 +105,6 @@ public class Server {
             //do nothing, action is already registered
         } else {
             pendingKeyActions.get(key).add('W');
-            System.out.println(pendingMessages.get(key));
             write(key, pendingMessages.remove(key));
         }
     }

@@ -1,8 +1,7 @@
 package cs455.scaling.threadpool;
 
-import cs455.scaling.tasks.Task;
+import cs455.scaling.tasks.common.Task;
 
-import java.io.IOException;
 import java.util.LinkedList;
 
 

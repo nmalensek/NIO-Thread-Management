@@ -1,6 +1,7 @@
-package cs455.scaling.tasks;
+package cs455.scaling.tasks.client;
 
 import cs455.scaling.client.Client;
+import cs455.scaling.tasks.common.Task;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -33,8 +34,6 @@ public class ClientRead implements Task {
                     String packetContents = new String(byteCopy);
                     client.checkForHashInList(packetContents);
                     client.getPendingActions().get(key).remove(Character.valueOf('R'));
-                    client.incrementMessagesReceived();
-//                    key.interestOps(SelectionKey.OP_WRITE);
                 } else {
                     byteBuffer.position(byteBuffer.limit());
                 }
