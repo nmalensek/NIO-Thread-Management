@@ -55,7 +55,7 @@ public class Client {
                     connect(key);
                 } else if (key.isReadable()) {
                     if (clientPendingActions.get(key).contains('R')) {
-
+                        //do nothing, key is already registered for a read
                     } else {
                         clientPendingActions.get(key).add('R');
                         read(key);

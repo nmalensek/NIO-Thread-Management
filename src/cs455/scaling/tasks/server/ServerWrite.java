@@ -33,7 +33,7 @@ public class ServerWrite implements Task {
                 ServerWrite writeCopy = new ServerWrite(key, data, server);
                 ThreadPoolManager.getInstance().addTask(writeCopy); //buffer full, write messages and copy write to TPM
             } else {
-                System.out.println("Writing...");
+//                System.out.println("Writing...");
                 server.incrementMessagesSent();
                 key.interestOps(SelectionKey.OP_READ);
                 server.getPendingActions().get(key).remove(Character.valueOf('W'));

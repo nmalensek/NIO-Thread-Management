@@ -40,8 +40,10 @@ public class ServerRead implements Task {
             }
 
         } catch (IOException e) {
-            System.out.println("IO Error, connection closed");
             channel.close();
+            ThreadPoolManager.getInstance().addTask(new PrintDisconnect());
+            keyActions.get(key).remove(Character.valueOf('R'));
+            server.decrementConnectionCount();
             return;
         }
 
@@ -53,9 +55,11 @@ public class ServerRead implements Task {
             keyActions.get(key).remove(Character.valueOf('R'));
             server.decrementConnectionCount();
             return;
+
         } else {
-            byte[] byteCopy = new byte[read];
-            System.arraycopy(byteBuffer.array(), 0, byteCopy, 0, read);
+            int dataStored = byteBuffer.limit(); //ensures all bytes in packet are read even if they're read in chunks
+            byte[] byteCopy = new byte[dataStored];
+            System.arraycopy(byteBuffer.array(), 0, byteCopy, 0, dataStored); //limit is total message size, ensures everything will be copied correctly!
             HashMessage hashMessage = new HashMessage(byteCopy, readyMessages, key, server);
             ThreadPoolManager.getInstance().addTask(hashMessage);
             server.incrementMessagesReceived();
