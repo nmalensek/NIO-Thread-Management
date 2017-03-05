@@ -2,8 +2,6 @@ package cs455.scaling.test;
 
 import cs455.scaling.tasks.common.Task;
 
-import java.util.concurrent.ThreadLocalRandom;
-
 public class TestPrint implements Task {
 
     private ThreadPoolTest threadPoolTest;
@@ -17,7 +15,7 @@ public class TestPrint implements Task {
         System.out.println("mission complete!");
         threadPoolTest.incrementTaskCounter();
         try {
-            Thread.sleep(ThreadLocalRandom.current().nextInt(5000));
+            Thread.sleep(5000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

@@ -22,7 +22,7 @@ public class ThreadPoolTest {
         System.out.println(taskCounter);
     }
 
-    private void addSingleMission() {
+    private void addSingleTask() {
         testTPM.addTask(new TestPrint(this));
     }
 

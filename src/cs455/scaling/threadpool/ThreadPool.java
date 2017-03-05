@@ -12,7 +12,6 @@ public class ThreadPool {
 
     public static ThreadPool getInstance() { return instance; }
 
-    public LinkedList<Worker> getWorkers() { return workers; }
     public void setPoolSize(int size) { poolSize = size; }
 
     public void createThreads() {
