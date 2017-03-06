@@ -11,6 +11,8 @@ import java.nio.channels.SocketChannel;
 /**
  * Code adapted from code given by instructor during lab help session:
  * http://www.cs.colostate.edu/~cs455/lectures/CS455-HelpSession5.pdf
+ *
+ * Unused, replaced by ClientWriterThread class.
  */
 
 public class ClientWrite implements Task {

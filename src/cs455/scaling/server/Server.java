@@ -95,6 +95,8 @@ public class Server {
     }
 
     /**
+     * Method code adapted from code given by instructor during lab help session:
+     * http://www.cs.colostate.edu/~cs455/lectures/CS455-HelpSession5.pdf.
      * Accepts incoming client connections. Must be performed by the server itself
      * and not by a worker thread for the connection to successfully complete.
      * Also attaches read and write ByteBuffers to the key to carry out those actions.
