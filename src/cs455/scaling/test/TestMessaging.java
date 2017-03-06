@@ -4,6 +4,10 @@ import cs455.scaling.hash.ComputeHash;
 
 import java.util.Random;
 
+/**
+ * Testing hash values and the best way to create an 8000 kb message.
+ */
+
 public class TestMessaging {
     private Long testLong2 = new Long(34);
     private Byte testByte = new Byte(Byte.MAX_VALUE);

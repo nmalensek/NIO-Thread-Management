@@ -8,6 +8,11 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 
+/**
+ * Code adapted from code given by instructor during lab help session:
+ * http://www.cs.colostate.edu/~cs455/lectures/CS455-HelpSession5.pdf
+ */
+
 public class ClientRead implements Task {
     private SelectionKey key;
     private int bufferSize;
@@ -18,6 +23,15 @@ public class ClientRead implements Task {
         this.bufferSize = bufferSize;
         this.client = client;
     }
+
+    /**
+     * Reads incoming message from server. Method reads while the ByteBuffer has bytes to read remaining
+     * in the SocketChannel and the connection is still active. If the SocketChannel has 0 bytes to read,
+     * the ByteBuffer is empty and the message can be processed by checking the list of sent hash codes.
+     * The "read" action is then marked as complete by removing the R character from the pending actions
+     * list.
+     * @throws IOException
+     */
 
     public void perform() throws IOException {
         SocketChannel channel = (SocketChannel) key.channel();
@@ -53,6 +67,7 @@ public class ClientRead implements Task {
             channel.close();
             key.channel().close();
             key.cancel();
+            client.shutdownMessageTracker();
             return;
         }
 

@@ -3,6 +3,10 @@ package cs455.scaling.test;
 import cs455.scaling.threadpool.ThreadPool;
 import cs455.scaling.threadpool.ThreadPoolManager;
 
+/**
+ * Tests thread pool implementation by loading thread pool with junk tasks.
+ */
+
 public class ThreadPoolTest {
     private static int taskCounter;
     private ThreadPool testThreadPool = ThreadPool.getInstance();

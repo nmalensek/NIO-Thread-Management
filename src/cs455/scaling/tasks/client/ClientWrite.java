@@ -8,6 +8,11 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 
+/**
+ * Code adapted from code given by instructor during lab help session:
+ * http://www.cs.colostate.edu/~cs455/lectures/CS455-HelpSession5.pdf
+ */
+
 public class ClientWrite implements Task {
     private SelectionKey key;
     private byte[] data;

@@ -9,6 +9,11 @@ import java.io.IOException;
 import java.nio.channels.SelectionKey;
 import java.util.Map;
 
+/**
+ * Computes hash of a message using the ComputeHash class. Hash computation
+ * is implemented as a task and carried out by worker threads.
+ */
+
 public class HashMessage implements Task {
 
     private byte[] bytesToSend;

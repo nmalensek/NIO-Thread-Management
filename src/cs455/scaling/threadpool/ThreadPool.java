@@ -12,7 +12,16 @@ public class ThreadPool {
 
     public static ThreadPool getInstance() { return instance; }
 
+    /**
+     * Sets thread pool size.
+     * @param size Desired thread pool size.
+     */
+
     public void setPoolSize(int size) { poolSize = size; }
+
+    /**
+     * Creates a thread pool of specified size and starts every thread in the pool.
+     */
 
     public void createThreads() {
         for (int i = 0; i < poolSize; i++) {

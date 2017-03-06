@@ -2,6 +2,10 @@ package cs455.scaling.server;
 
 import java.nio.ByteBuffer;
 
+/**
+ * Allocates ByteBuffers for reading and writing that are attached to client SelectionKeys.
+ */
+
 public class KeyBuffers {
 
     private ByteBuffer readBuffer;

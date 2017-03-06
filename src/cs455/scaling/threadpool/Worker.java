@@ -6,6 +6,11 @@ public class Worker extends Thread {
 
     private ThreadPoolManager threadPoolManager = ThreadPoolManager.getInstance();
 
+    /**
+     * Worker thread, constantly removes tasks and performs them as long
+     * as there's a task in the queue.
+     */
+
     public void run() {
         while (true) {
             try {

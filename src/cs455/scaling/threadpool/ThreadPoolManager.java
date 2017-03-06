@@ -14,16 +14,33 @@ public class ThreadPoolManager extends Thread {
         return threadPoolManager;
     }
 
+    /**
+     * ThreadPoolManager implemented as its own thread so server is always
+     * free to handle new connections.
+     */
+
     public void run() {
         while (true) {
             //handle incoming interactions
         }
     }
 
+    /**
+     * Notifies all waiting threads that a new task is available to work on.
+     * Is called every time a task is created.
+     * @param task Task that needs to be performed.
+     */
+
     public synchronized void addTask(Task task) {
         TASK_LINKED_LIST.add(task);
         notifyAll();
     }
+
+    /**
+     * Removes a completed task from the pending tasks list, effectively marking
+     * it as complete. If there are no new tasks, the thread waits.
+     * @return Task that the thread will now be executing.
+     */
 
     public synchronized Task removeTask() {
         while (TASK_LINKED_LIST.isEmpty()) {
@@ -35,6 +52,11 @@ public class ThreadPoolManager extends Thread {
         }
         return TASK_LINKED_LIST.remove();
     }
+
+    /**
+     * Called to create thread pool when server is initialized.
+     * @param threadsToAdd Desired thread pool size.
+     */
 
     public void addThreadsToPool(int threadsToAdd) {
         threadPool.setPoolSize(threadsToAdd);

@@ -38,6 +38,12 @@ public class Server {
     private Map<SelectionKey, List<Character>> pendingKeyActions =
             Collections.synchronizedMap(new HashMap<>());
 
+    /**
+     * Starts server, creates thread pool, starts necessary threads, then listens for incoming
+     * connections and tasks.
+     * @throws IOException
+     */
+
     public void startServer() throws IOException {
         openChannels();
         threadPoolManager.addThreadsToPool(poolSize);
@@ -47,6 +53,12 @@ public class Server {
         listenForTasks();
     }
 
+    /**
+     * Allows new clients to connect to the server by opening the ServerSocketChannel
+     * and setting the intention to accepting connections.
+     * @throws IOException
+     */
+
     private void openChannels() throws IOException {
         serverSocketChannel = ServerSocketChannel.open();
         serverSocketChannel.configureBlocking(false);
@@ -54,6 +66,14 @@ public class Server {
         selector = Selector.open();
         serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
     }
+
+    /**
+     * Method code adapted from code given by instructor during lab help session:
+     * http://www.cs.colostate.edu/~cs455/lectures/CS455-HelpSession5.pdf
+     * Iterates through server's registered client keys and performs the appropriate action
+     * depending on the key's intent.
+     * @throws IOException
+     */
 
     private void listenForTasks() throws IOException {
         while (true) {
@@ -74,6 +94,14 @@ public class Server {
         }
     }
 
+    /**
+     * Accepts incoming client connections. Must be performed by the server itself
+     * and not by a worker thread for the connection to successfully complete.
+     * Also attaches read and write ByteBuffers to the key to carry out those actions.
+     * @param key New client's SelectionKey.
+     * @throws IOException
+     */
+
     private synchronized void accept(SelectionKey key) throws IOException {
         ServerSocketChannel serverSocket = (ServerSocketChannel) key.channel();
         SocketChannel channel = serverSocket.accept();
@@ -85,16 +113,37 @@ public class Server {
         incrementConnectionCount();
     }
 
+    /**
+     * Creates a new ServerRead task for a worker thread to execute.
+     * @param key Sender's SelectionKey.
+     * @throws IOException
+     */
+
     private synchronized void read(SelectionKey key) throws IOException {
 //        System.out.println("Reading...");
         ServerRead serverRead = new ServerRead(key, this, pendingMessages, pendingKeyActions);
         threadPoolManager.addTask(serverRead);
     }
 
+    /**
+     * Creates a new ServerWrite task for a worker thread to execute.
+     * @param key Sender's SelectionKey.
+     * @throws IOException
+     */
+
     private void write(SelectionKey key, byte[] data) throws IOException {
         ServerWrite write = new ServerWrite(key, data, this);
         threadPoolManager.addTask(write);
     }
+
+    /**
+     * Checks if the key has already been registered as needing a read action.
+     * If it has been, the key Iterator in listenForTasks continues. Otherwise,
+     * the server logs that the key wants to be read. This is to prevent a key
+     * from creating multiple read tasks for the data it sent.
+     * @param key Sender's SelectionKey.
+     * @throws IOException
+     */
 
     private synchronized void checkRead(SelectionKey key) throws IOException {
         if (pendingKeyActions.get(key).contains('R')) {
@@ -104,6 +153,16 @@ public class Server {
             read(key);
         }
     }
+
+    /**
+     * Checks if the key has already been registered as needing a write action.
+     * If it has been, the key Iterator in listenForTasks continues. Otherwise,
+     * the server logs that the key wants to write. This is to prevent a key
+     * from creating multiple write tasks that will result in faulty messages
+     * (a null byte array is passed into the ServerWrite method).
+     * @param key Message receiver's SelectionKey.
+     * @throws IOException
+     */
 
     private synchronized void checkWrite(SelectionKey key) throws IOException {
         if (pendingKeyActions.get(key).contains('W')) {
@@ -133,6 +192,11 @@ public class Server {
     public Map<SelectionKey, List<Character>> getPendingActions() {
         return pendingKeyActions;
     }
+
+    /**
+     * Sets number of messages sent and received in the ServerMessageTracker class, then resets counters
+     * to 0. This provides the client's throughput for the duration specified in ServerMessageTracker's run() method.
+     */
 
     public void copyAndResetTrackers() {
         serverMessageTracker.setCurrentSentMessages(sentMessages);

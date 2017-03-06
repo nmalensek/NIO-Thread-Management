@@ -15,6 +15,10 @@ public class ServerMessageTracker extends Thread {
         this.server = server;
     }
 
+    /**
+     * Prints server's throughput every 5 seconds.
+     */
+
     public void run() {
         while (true) {
             try {
@@ -31,10 +35,20 @@ public class ServerMessageTracker extends Thread {
         printThroughputMessage(calculateThroughput());
     }
 
+    /**
+     * Reports throughput per 5 seconds.
+     * @return Throughput (sent and received messages in last 5 seconds).
+     */
+
     public int calculateThroughput() {
         int throughput = (currentSentMessages + currentReceivedMessages) / 5;
         return throughput;
     }
+
+    /**
+     * Constructs throughput message.
+     * @param throughput Throughput calculated in calculateThroughput method.
+     */
 
     public void printThroughputMessage(int throughput) {
         String throughputMessage = "";

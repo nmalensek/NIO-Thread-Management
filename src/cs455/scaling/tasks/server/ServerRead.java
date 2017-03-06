@@ -13,6 +13,11 @@ import java.nio.channels.SocketChannel;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Code adapted from code given by instructor during lab help session:
+ * http://www.cs.colostate.edu/~cs455/lectures/CS455-HelpSession5.pdf
+ */
+
 public class ServerRead implements Task {
 
     private SelectionKey key;
@@ -27,6 +32,14 @@ public class ServerRead implements Task {
         this.readyMessages = readyMessages;
         this.keyActions = keyActions;
     }
+
+    /**
+     * Reads incoming message from client. Method reads while the ByteBuffer has bytes to read remaining
+     * in the SocketChannel and the connection is still active. The "read" action is then marked as complete
+     * by removing the R character from the key's pending actions list. Checks are in place to ensure the server
+     * reads the entire 8 kb message from the client (see comments below).
+     * @throws IOException
+     */
 
     public synchronized void perform() throws IOException {
         SocketChannel channel = (SocketChannel) key.channel();

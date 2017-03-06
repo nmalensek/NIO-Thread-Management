@@ -9,6 +9,11 @@ import java.nio.channels.SocketChannel;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * Code adapted from code given by instructor during lab help session:
+ * http://www.cs.colostate.edu/~cs455/lectures/CS455-HelpSession5.pdf
+ */
+
 public class ClientWriterThread extends Thread {
 
     private Client client;
@@ -23,6 +28,10 @@ public class ClientWriterThread extends Thread {
         this.hashList = hashList;
     }
 
+    /**
+     * Writes messages per second at the rate specified by third command line argument for Client class
+     */
+
     public void run() {
         while (true) {
             try {
@@ -32,11 +41,15 @@ public class ClientWriterThread extends Thread {
                 e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();
-                System.out.println("Server disconnected, exiting...");
                 break;
             }
         }
     }
+
+    /**
+     * Constructs message containing random byte array and writes it to the client's SocketChannel
+     * @throws IOException
+     */
 
     private void writeMessage() throws IOException {
         byte[] arrayToSend = prepareMessage();
@@ -46,6 +59,11 @@ public class ClientWriterThread extends Thread {
         channel.write(byteBuffer);
         client.incrementMessagesSent();
     }
+
+    /**
+     * Constructs random 8 kb byte array to send to the server
+     * @return byte array of random bytes
+     */
 
     private byte[] prepareMessage() {
         byte[] byteArray = new byte[8000];

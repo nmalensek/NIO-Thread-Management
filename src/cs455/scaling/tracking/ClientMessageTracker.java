@@ -9,13 +9,17 @@ public class ClientMessageTracker extends Thread {
     private Client client;
     private int currentSentMessages;
     private int currentReceivedMessages;
+    private boolean running = true;
 
     public ClientMessageTracker(Client client) {
         this.client = client;
     }
 
+    /**
+     * Prints message throughput every 10 seconds.
+     */
     public void run() {
-        while (true) {
+        while (running) {
             try {
                 Thread.sleep(10000);
                 reportClientThroughput();
@@ -29,6 +33,12 @@ public class ClientMessageTracker extends Thread {
         client.copyAndResetTrackers();
         printMessagingRate(currentSentMessages, currentReceivedMessages);
     }
+
+    /**
+     * Constructs string of client's sent and received messages for the current timestamp
+     * @param sent number of messages sent to the server
+     * @param received number of messages received from the server
+     */
 
     public void printMessagingRate(int sent, int received) {
         String throughputMessage = "";
@@ -44,5 +54,15 @@ public class ClientMessageTracker extends Thread {
 
     public void setCurrentReceivedMessages(int currentReceivedMessages) {
         this.currentReceivedMessages = currentReceivedMessages;
+    }
+
+    /**
+     * Shuts down this class's thread. Currently only called by the client if the server disconnects.
+     * Thread will finish its current execution before stopping, but that's fine in this case because
+     * it's just printing statements.
+     */
+
+    public void shutdown() {
+        running = false;
     }
 }
